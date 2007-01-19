@@ -6,12 +6,13 @@
 ####################################################################### 
 #Compiles the code into a ebin dir. relative to the source dir. 
 
+EUNIT   := $(HOME)/workplace/eunit
 ERLC 	:= erlc
 GEN 	:= beam
 
 EFLAGS := -pa ebin
 
-INCLUDE := include
+INCLUDE := -Iinclude -I$(EUNIT)/include
 EBIN 	:= ebin
 SRC     := $(wildcard src/*.erl)
 HEADERS := $(wildcard $(INCLUDE)/*.hrl)	
@@ -23,7 +24,7 @@ DOTAPP  := $(patsubst src/%.app.src, ebin/%.app, $(DOTSRC))
 .PHONY: clean all
 
 $(EBIN)/%.beam: src/%.erl
-	$(ERLC) -I$(INCLUDE)  -W -b beam -o $(EBIN) $(EFLAGS) $(WAIT) $<
+	$(ERLC) $(INCLUDE) -pa $(EUNIT)/ebin -W -b beam -o $(EBIN) $(EFLAGS) $(WAIT) $<
 
 all: $(CODE) 
 
