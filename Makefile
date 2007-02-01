@@ -10,7 +10,7 @@ EUNIT   := $(HOME)/workplace/eunit
 ERLC 	:= erlc
 GEN 	:= beam
 
-EFLAGS := -pa ebin
+EFLAGS := -pa ebin +debug_info
 
 INCLUDE := -Iinclude -I$(EUNIT)/include
 EBIN 	:= ebin
