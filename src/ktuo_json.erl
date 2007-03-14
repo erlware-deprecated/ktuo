@@ -50,6 +50,8 @@
 %%  use json as a config language.
 %% @end
 %%--------------------------------------------------------------------
+decode(Stream) when is_binary(Stream) ->
+    decode(binary_to_list(Stream), 0, 0);
 decode(Stream) ->
     decode(Stream, 0, 0).
 
@@ -308,7 +310,7 @@ value([$9 | T], NewLines, Chars) ->
 value([$[ | T], NewLines, Chars) ->
     array_body(T, [], NewLines, Chars + 1); 
 value([${ | T], NewLines, Chars) ->
-    object_body(T, [], NewLines, Chars + 1); 
+    object_body(T, dict:new(), NewLines, Chars + 1); 
 value([$t, $r, $u, $e | T], NewLines, Chars) ->
     {true, T, {NewLines, Chars + 4}};
 value([$f, $a, $l, $s, $e | T], NewLines, Chars) ->
@@ -387,7 +389,8 @@ do_value(Key, Stream, Acc, NewLines, Chars) ->
         {Rest, NLines, NChars} ->
             case value(Rest, NLines, NChars) of
                 {Value, Rest1, {NLines1, NChars1}} ->
-                    object_body(Rest1, [{Key, Value} | Acc], NLines1, NChars1);
+                    object_body(Rest1, dict:store(Key, Value, Acc), 
+                                NLines1, NChars1);
                 Else ->
                     Else
             end;
@@ -498,13 +501,6 @@ encode_array_test() ->
                                         {{string, "Goodbye"}, true}],
                                        43, 54]))).
 
-encode_object_test() ->
-    ?assertMatch("{\"Hello\":\"Hel\",\"Super\":421}",
-                 lists:flatten(encode([{{string, "Super"}, 421},
-                                {'Hello','Hel'}]))).
-
-
-
 boolean_test() ->
     ?assertMatch({true, [], {0, 4}}, value("true", 0, 0)),
     ?assertMatch({false, [], {0, 5}}, value("false", 0, 0)).
@@ -518,122 +514,4 @@ ident_test() ->
     ?assertMatch({"bock", [$:], {0, 4}}, value("bock:", 0, 0)),
     ?assertMatch({"bock", [${], {0, 4}}, value("bock{", 0, 0)),
     ?assertMatch({"bock", [$[], {0, 4}}, value("bock[", 0, 0)).
-
-
-glossary_test() ->
-    ?assertMatch({[{"glossary",
-                   [{"GlossDiv",
-                     [{"GlossList",
-                       [{"GlossEntry",
-                         [{"GlossSee","markup"},
-                          {"GlossDef",
-                           [{"GlossSeeAlso",["GML","XML"]},
-                            {"para","A meta-mars DocBook."}]},
-                          {"Abbrev","ISO 8879:1986"},
-                          {"Acronym","SGML"},
-                          {"GlossTerm","Standareralized"},
-                          {"SortAs","SGML"},
-                          {"ID","SGML"}]}]},
-                      {"title","S"}]},
-                    {"title","example glossary"}]}],
-                  [], {21, 1}},  
-                 value("{ \n"   
-                      "\"glossary\": { \n"
-                      "  \"title\": \"example glossary\",\n"
-                      " \"GlossDiv\": {\n"
-                      "      \"title\": \"S\", \n"
-                      "  \"GlossList\": { \n"
-                      "          \"GlossEntry\": {\n"
-                      "              \"ID\": \"SGML\",\n"
-                      "            \"SortAs\": \"SGML\",\n"
-                      "            \"GlossTerm\": \"Standareralized\", \n"
-                      "            \"Acronym\": \"SGML\", \n"
-                      "            \"Abbrev\": \"ISO 8879:1986\",\n"
-                      "            \"GlossDef\": { \n"
-                      "                  \"para\": \"A meta-mars DocBook.\",\n"
-                      "             \"GlossSeeAlso\": [\"GML\", \"XML\"]\n"
-                      "             },\n"
-                      "            \"GlossSee\": \"markup\" \n"
-                      "          }\n"
-                      "      }\n"
-                      "  }\n"
-                      "}\n}", 0, 0)).
-
-menu_test() ->
-    ?assertMatch({[{"menu",
-                    [{"popup",
-                      [{"menuitem",
-                        [[{"onclick","CreateNewDoc()"},
-                          {"value","New"}],
-                         [{"onclick","OpenDoc()"},
-                          {"value","Open"}],
-                         [{"onclick","CloseDoc()"},
-                          {"value","Close"}]]}]},
-                     {"value","File"},
-                     {"id","file"}]}],
-                  [], {11, 1}},
-      value("{\"menu\": {\n"
-            "  \"id\": \"file\",\n"
-            "  \"value\": \"File\",\n"
-            "  \"popup\": {\n"
-            "      \"menuitem\": [\n"
-            "          {\"value\": \"New\", \"onclick\":\"CreateNewDoc()\"},\n"
-            "          {\"value\": \"Open\", \"onclick\": \"OpenDoc()\"},\n"
-            "          {\"value\": \"Close\", \"onclick\": \"CloseDoc()\"}\n"
-            "                    ]\n"
-            "   }\n"
-            "}\n}", 0, 0)).
-
-widget_test() ->
-    ?assertMatch({[{"widget",
-                    [{"text",
-                      [{"onMouseUp",
-                        "sun1.opacity=(sun1.opacity/100)*9;"},
-                       {"alignment","center"},
-                       {"vOffset",100},
-                       {"hOffset",250},
-                       {"name","text1"},
-                       {"style","bold"},
-                       {"size",36},
-      {"data","Click Here"}]},
-                     {"image",
-                      [{"alignment","center"},
-                       {"vOffset",250},
-                       {"hOffset",250},
-                       {"name","sun1"},
-                       {"src","Images/Sun.png"}]},
-                     {"window",
-                      [{"height",500},
-                       {"width",500},
-                       {"name","main_window"},
-                       {"title","Sample Konfabulator Widget"}]},
-                     {"debug","on"}]}],
-                  [], {26, 1}},
-                 
-                 value("{\"widget\": {\n"
-                       "    debug: on,\n"
-                       "    window: {\n"
-                       "        title: \"Sample Konfabulator Widget\",\n"
-                       "        name: \"main_window\",\n"
-                       "        \"width\": 500,\n"
-                       "        \"height\": 500\n"
-                       "    },\n"
-                       "    \"image\": { \n"
-                       "        \"src\": \"Images/Sun.png\",\n"
-                       "        \"name\": \"sun1\",\n"
-                       "        \"hOffset\": 250,\n"
-                       "        \"vOffset\": 250,\n"
-                       "        \"alignment\": \"center\"\n"
-                       "    },\n"
-                       "    \"text\": {\n"
-                       "        \"data\": \"Click Here\",\n"
-                       "        \"size\": 36,\n"
-                       "        \"style\": \"bold\",\n"
-                       "        \"name\": \"text1\",\n"
-                       "        \"hOffset\": 250,\n"
-                       "        \"vOffset\": 100,\n"
-                       "        \"alignment\": \"center\",\n"
-                       "\"onMouseUp\":\"sun1.opacity=(sun1.opacity/100)*9;\"\n"
-                       "    }\n"
-                       "}\n}", 0, 0)).  
 
