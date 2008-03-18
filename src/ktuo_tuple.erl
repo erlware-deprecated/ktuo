@@ -1,28 +1,37 @@
+%% -*- mode: Erlang; fill-column: 132; comment-column: 118; -*-
 %%%-------------------------------------------------------------------
-%%% Copyright 2006 Eric Merritt
+%%% Copyright (c) 2006,2007,2008 Erlware
 %%%
-%%% Licensed under the Apache License, Version 2.0 (the "License");  
-%%% you may not use this file except in compliance with the License.
-%%% You may obtain a copy of the License at
+%%% Permission is hereby granted, free of charge, to any
+%%% person obtaining a copy of this software and associated
+%%% documentation files (the "Software"), to deal in the
+%%% Software without restriction, including without limitation
+%%% the rights to use, copy, modify, merge, publish, distribute,
+%%% sublicense, and/or sell copies of the Software, and to permit
+%%% persons to whom the Software is furnished to do so, subject to
+%%% the following conditions:
 %%%
-%%%       http://www.apache.org/licenses/LICENSE-2.0
+%%% The above copyright notice and this permission notice shall
+%%% be included in all copies or substantial portions of the Software.
 %%%
-%%%  Unless required by applicable law or agreed to in writing, software
-%%%  distributed under the License is distributed on an "AS IS" BASIS,
-%%%  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or 
-%%%  implied. See the License for the specific language governing 
-%%%  permissions and limitations under the License.
-%%%
+%%% THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+%%% EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+%%% OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+%%% NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+%%% HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+%%% WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+%%% OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+%%% OTHER DEALINGS IN THE SOFTWARE.
 %%%---------------------------------------------------------------------------
-%%% @author Eric Merritt 
-%%% @doc 
+%%% @author Eric Merritt
+%%% @doc
 %%%  Does a safe parsing of erlang tuple syntax. If it finds an atom it
-%%%  uses list_to_existing atom to translate it. This will only work 
+%%%  uses list_to_existing atom to translate it. This will only work
 %%%  if that atom is already in the atom table. This means its a bit quirky
 %%%  but it works for what I need.
 %%% @end
 %%% @copyright (C) 2006
-%%% Created : 19 Dec 2006 by Eric Merritt 
+%%% Created : 19 Dec 2006 by Eric Merritt
 %%%-------------------------------------------------------------------
 -module(ktuo_tuple).
 
@@ -34,9 +43,9 @@
 
 %%--------------------------------------------------------------------
 %% @spec decode(Stream) -> {ParsedTuples, UnparsedRemainder}
-%% 
-%% @doc 
-%%  Parses the incoming stream into valid erlang objects. 
+%%
+%% @doc
+%%  Parses the incoming stream into valid erlang objects.
 %%  ``
 %%   Tuple   ==   Erlang
 %%   List        List
@@ -59,8 +68,8 @@ decode(Stream, NewLines, Chars) ->
 %%=============================================================================
 %%--------------------------------------------------------------------
 %% @spec value(Stream, NewLines, Chars) -> {Value, Rest, {N, L}}.
-%% 
-%% @doc 
+%%
+%% @doc
 %%  Parse a tuple value.
 %% @end
 %%--------------------------------------------------------------------
@@ -76,45 +85,45 @@ value([$\' | T], NewLines, Chars) ->
 value([$- | T], NewLines, Chars) ->
     ktuo_parse_utils:digit19(T, [$-], NewLines, Chars + 1);
 value([$0 | T], NewLines, Chars) ->
-    ktuo_parse_utils:digit(T, [$0], front, NewLines, Chars + 1); 
+    ktuo_parse_utils:digit(T, [$0], front, NewLines, Chars + 1);
 value([$1 | T], NewLines, Chars) ->
-    ktuo_parse_utils:digit(T, [$1], front, NewLines, Chars + 1); 
+    ktuo_parse_utils:digit(T, [$1], front, NewLines, Chars + 1);
 value([$2 | T], NewLines, Chars) ->
-    ktuo_parse_utils:digit(T, [$2], front, NewLines, Chars + 1); 
+    ktuo_parse_utils:digit(T, [$2], front, NewLines, Chars + 1);
 value([$3 | T], NewLines, Chars) ->
-    ktuo_parse_utils:digit(T, [$3], front, NewLines, Chars + 1); 
+    ktuo_parse_utils:digit(T, [$3], front, NewLines, Chars + 1);
 value([$4 | T], NewLines, Chars) ->
-    ktuo_parse_utils:digit(T, [$4], front, NewLines, Chars + 1); 
+    ktuo_parse_utils:digit(T, [$4], front, NewLines, Chars + 1);
 value([$5 | T], NewLines, Chars) ->
-    ktuo_parse_utils:digit(T, [$5], front, NewLines, Chars + 1); 
+    ktuo_parse_utils:digit(T, [$5], front, NewLines, Chars + 1);
 value([$6 | T], NewLines, Chars) ->
-    ktuo_parse_utils:digit(T, [$6], front, NewLines, Chars + 1); 
+    ktuo_parse_utils:digit(T, [$6], front, NewLines, Chars + 1);
 value([$7 | T], NewLines, Chars) ->
-    ktuo_parse_utils:digit(T, [$7], front, NewLines, Chars + 1); 
+    ktuo_parse_utils:digit(T, [$7], front, NewLines, Chars + 1);
 value([$8 | T], NewLines, Chars) ->
-    ktuo_parse_utils:digit(T, [$8], front, NewLines, Chars + 1); 
+    ktuo_parse_utils:digit(T, [$8], front, NewLines, Chars + 1);
 value([$9 | T], NewLines, Chars) ->
-    ktuo_parse_utils:digit(T, [$9], front, NewLines, Chars + 1); 
+    ktuo_parse_utils:digit(T, [$9], front, NewLines, Chars + 1);
 value([$[ | T], NewLines, Chars) ->
-    list_body(T, [], NewLines, Chars + 1); 
+    list_body(T, [], NewLines, Chars + 1);
 value([${ | T], NewLines, Chars) ->
-    tuple_body(T, [], NewLines, Chars + 1); 
+    tuple_body(T, [], NewLines, Chars + 1);
 value([$\s | T], NewLines, Chars) ->
-    value(T, NewLines, Chars + 1); 
+    value(T, NewLines, Chars + 1);
 value([$\t | T], NewLines, Chars) ->
-    value(T, NewLines, Chars + 1); 
+    value(T, NewLines, Chars + 1);
 value([$\r | T], NewLines, _Chars) ->
-    value(T, NewLines + 1, 0); 
+    value(T, NewLines + 1, 0);
 value([$\n | T], NewLines, _Chars) ->
-    value(T, NewLines + 1, 0); 
+    value(T, NewLines + 1, 0);
 value(Stream, NewLines, Chars) ->
     bare_atom(Stream, [], NewLines, Chars).
 
 
 %%--------------------------------------------------------------------
 %% @spec list_body(Stream, Acc) -> {List, Rest, {N, L}} | Error.
-%% 
-%% @doc 
+%%
+%% @doc
 %%  Parse a list body. A list is [ elements, ..].
 %% @end
 %%--------------------------------------------------------------------
@@ -140,8 +149,8 @@ list_body(Stream, Acc, NewLines, Chars) ->
 
 %%--------------------------------------------------------------------
 %% @spec tuple_body(Stream, Acc) -> {Tuple, Rest, {N, C}} | Error.
-%% 
-%% @doc 
+%%
+%% @doc
 %%  Parse the tuple body. Tuple bodies are of the form { element, ..}.
 %% @end
 %%--------------------------------------------------------------------
@@ -168,8 +177,8 @@ tuple_body(Stream, Acc, NewLines, Chars) ->
 
 %%--------------------------------------------------------------------
 %% @spec bare_atom(Stream, Acc) -> {Atom, Rest, {N, C}} | Error.
-%% 
-%% @doc 
+%%
+%% @doc
 %%  Parse an atom that doesn't have single quote delimeters.
 %% @end
 %%--------------------------------------------------------------------
@@ -206,7 +215,7 @@ decode_tuple_test() ->
 decode_atom_test() ->
     ?assertMatch({hello, [], {0, 5}}, decode("hello")),
     ?assertMatch({goodbye, [], {0, 7}}, decode("goodbye")),
-    ?assertMatch({'ba ba black sheep', [], {0, 19}}, 
+    ?assertMatch({'ba ba black sheep', [], {0, 19}},
                  decode("'ba ba black sheep'")).
 
 decode_number_test() ->

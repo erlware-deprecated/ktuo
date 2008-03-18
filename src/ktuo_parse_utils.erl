@@ -1,25 +1,34 @@
+%% -*- mode: Erlang; fill-column: 132; comment-column: 118; -*-
 %%%-------------------------------------------------------------------
-%%% Copyright 2006 Eric Merritt
+%%% Copyright (c) 2006,2007,2008 Erlware
 %%%
-%%% Licensed under the Apache License, Version 2.0 (the "License");  
-%%% you may not use this file except in compliance with the License.
-%%% You may obtain a copy of the License at
+%%% Permission is hereby granted, free of charge, to any
+%%% person obtaining a copy of this software and associated
+%%% documentation files (the "Software"), to deal in the
+%%% Software without restriction, including without limitation
+%%% the rights to use, copy, modify, merge, publish, distribute,
+%%% sublicense, and/or sell copies of the Software, and to permit
+%%% persons to whom the Software is furnished to do so, subject to
+%%% the following conditions:
 %%%
-%%%       http://www.apache.org/licenses/LICENSE-2.0
+%%% The above copyright notice and this permission notice shall
+%%% be included in all copies or substantial portions of the Software.
 %%%
-%%%  Unless required by applicable law or agreed to in writing, software
-%%%  distributed under the License is distributed on an "AS IS" BASIS,
-%%%  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or 
-%%%  implied. See the License for the specific language governing 
-%%%  permissions and limitations under the License.
-%%%
+%%% THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+%%% EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+%%% OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+%%% NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+%%% HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+%%% WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+%%% OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+%%% OTHER DEALINGS IN THE SOFTWARE.
 %%%---------------------------------------------------------------------------
-%%% @author Eric Merritt 
-%%% @doc 
-%%% 
+%%% @author Eric Merritt
+%%% @doc
+%%%   Help parsing the general parts of the system.
 %%% @end
 %%% @copyright (C) 2006
-%%% Created : 19 Dec 2006 by Eric Merritt 
+%%% Created : 19 Dec 2006 by Eric Merritt
 %%%-------------------------------------------------------------------
 -module(ktuo_parse_utils).
 
@@ -37,10 +46,10 @@
 %%=============================================================================
 %%--------------------------------------------------------------------
 %% @spec stringish_body(Delim, Stream, Acc) -> {String, Rest}.
-%% 
-%% @doc 
+%%
+%% @doc
 %%  Parses a string body into a string.
-%%  It expects the fact that something is a string to already be 
+%%  It expects the fact that something is a string to already be
 %%  detected. So strings should be of the form
 %%
 %%  this is a string body"
@@ -78,9 +87,9 @@ stringish_body(_Delim, [], _Acc, NewLines, Chars) ->
 
 %%--------------------------------------------------------------------
 %% @spec digit19(Stream, Acc, NewLines, Chars) -> Acc2 | Error.
-%% 
-%% @doc 
-%%  Parse from the stream ensuring that the digits has a length of 
+%%
+%% @doc
+%%  Parse from the stream ensuring that the digits has a length of
 %%  between 1 and 9.
 %% @end
 %%--------------------------------------------------------------------
@@ -108,8 +117,8 @@ digit19(Else, Acc, NewLines, Chars) ->
 
 %%--------------------------------------------------------------------
 %% @spec digit(Stream, Acc, Next) -> {Res, Rest}.
-%% 
-%% @doc 
+%%
+%% @doc
 %%  Parse out the specified digit set.
 %% @end
 %%--------------------------------------------------------------------
@@ -139,76 +148,76 @@ digit(Stream, Acc, Next, NewLines, Chars) ->
 %%=============================================================================
 %% Internal functions
 %%=============================================================================
-parse_hex_digit([$0 | T], Acc, HexAcc, Delim, NewLines, Chars) 
+parse_hex_digit([$0 | T], Acc, HexAcc, Delim, NewLines, Chars)
   when length(HexAcc) < 4 ->
     parse_hex_digit(T, Acc, [$0 | HexAcc], Delim, NewLines, Chars + 1);
-parse_hex_digit([$1 | T], Acc, HexAcc, Delim, NewLines, Chars)  
+parse_hex_digit([$1 | T], Acc, HexAcc, Delim, NewLines, Chars)
   when length(HexAcc) < 4 ->
     parse_hex_digit(T, Acc, [$1 | HexAcc], Delim, NewLines, Chars + 1);
-parse_hex_digit([$2 | T], Acc, HexAcc, Delim, NewLines, Chars)  
+parse_hex_digit([$2 | T], Acc, HexAcc, Delim, NewLines, Chars)
   when length(HexAcc) < 4 ->
     parse_hex_digit(T, Acc, [$2 | HexAcc], Delim, NewLines, Chars + 1);
-parse_hex_digit([$3 | T], Acc, HexAcc, Delim, NewLines, Chars) 
+parse_hex_digit([$3 | T], Acc, HexAcc, Delim, NewLines, Chars)
   when length(HexAcc) < 4 ->
     parse_hex_digit(T, Acc, [$3 | HexAcc], Delim, NewLines, Chars + 1);
-parse_hex_digit([$4 | T], Acc, HexAcc, Delim, NewLines, Chars) 
+parse_hex_digit([$4 | T], Acc, HexAcc, Delim, NewLines, Chars)
   when length(HexAcc) < 4 ->
     parse_hex_digit(T, Acc, [$4 | HexAcc], Delim, NewLines, Chars + 1);
-parse_hex_digit([$5 | T], Acc, HexAcc, Delim, NewLines, Chars) 
+parse_hex_digit([$5 | T], Acc, HexAcc, Delim, NewLines, Chars)
   when length(HexAcc) < 4 ->
     parse_hex_digit(T, Acc, [$5 | HexAcc], Delim, NewLines, Chars + 1);
-parse_hex_digit([$6 | T], Acc, HexAcc, Delim, NewLines, Chars) 
+parse_hex_digit([$6 | T], Acc, HexAcc, Delim, NewLines, Chars)
   when length(HexAcc) < 4 ->
     parse_hex_digit(T, Acc, [$6 | HexAcc], Delim, NewLines, Chars + 1);
-parse_hex_digit([$7 | T], Acc, HexAcc, Delim, NewLines, Chars) 
+parse_hex_digit([$7 | T], Acc, HexAcc, Delim, NewLines, Chars)
   when length(HexAcc) < 4 ->
     parse_hex_digit(T, Acc, [$7 | HexAcc], Delim, NewLines, Chars + 1);
-parse_hex_digit([$8 | T], Acc, HexAcc, Delim, NewLines, Chars) 
+parse_hex_digit([$8 | T], Acc, HexAcc, Delim, NewLines, Chars)
   when length(HexAcc) < 4 ->
     parse_hex_digit(T, Acc, [$8 | HexAcc], Delim, NewLines, Chars + 1);
-parse_hex_digit([$9 | T], Acc, HexAcc, Delim, NewLines, Chars) 
+parse_hex_digit([$9 | T], Acc, HexAcc, Delim, NewLines, Chars)
   when length(HexAcc) < 4 ->
     parse_hex_digit(T, Acc, [$9 | HexAcc], Delim, NewLines, Chars + 1);
-parse_hex_digit([$A | T], Acc, HexAcc, Delim, NewLines, Chars) 
+parse_hex_digit([$A | T], Acc, HexAcc, Delim, NewLines, Chars)
   when length(HexAcc) < 4 ->
     parse_hex_digit(T, Acc, [$A | HexAcc], Delim, NewLines, Chars + 1);
-parse_hex_digit([$a | T], Acc, HexAcc, Delim, NewLines, Chars) 
+parse_hex_digit([$a | T], Acc, HexAcc, Delim, NewLines, Chars)
   when length(HexAcc) < 4 ->
     parse_hex_digit(T, Acc, [$A | HexAcc], Delim, NewLines, Chars + 1);
-parse_hex_digit([$B | T], Acc, HexAcc, Delim, NewLines, Chars) 
+parse_hex_digit([$B | T], Acc, HexAcc, Delim, NewLines, Chars)
   when length(HexAcc) < 4 ->
     parse_hex_digit(T, Acc, [$B | HexAcc], Delim, NewLines, Chars + 1);
-parse_hex_digit([$b | T], Acc, HexAcc, Delim, NewLines, Chars) 
+parse_hex_digit([$b | T], Acc, HexAcc, Delim, NewLines, Chars)
   when length(HexAcc) < 4 ->
     parse_hex_digit(T, Acc, [$B | HexAcc], Delim, NewLines, Chars + 1);
-parse_hex_digit([$C | T], Acc, HexAcc, Delim, NewLines, Chars) 
+parse_hex_digit([$C | T], Acc, HexAcc, Delim, NewLines, Chars)
   when length(HexAcc) < 4 ->
     parse_hex_digit(T, Acc, [$C | HexAcc], Delim, NewLines, Chars + 1);
-parse_hex_digit([$c | T], Acc, HexAcc, Delim, NewLines, Chars) 
+parse_hex_digit([$c | T], Acc, HexAcc, Delim, NewLines, Chars)
   when length(HexAcc) < 4 ->
     parse_hex_digit(T, Acc, [$C | HexAcc], Delim, NewLines, Chars + 1);
-parse_hex_digit([$D | T], Acc, HexAcc, Delim, NewLines, Chars) 
+parse_hex_digit([$D | T], Acc, HexAcc, Delim, NewLines, Chars)
   when length(HexAcc) < 4 ->
     parse_hex_digit(T, Acc, [$D | HexAcc], Delim, NewLines, Chars + 1);
-parse_hex_digit([$d | T], Acc, HexAcc, Delim, NewLines, Chars) 
+parse_hex_digit([$d | T], Acc, HexAcc, Delim, NewLines, Chars)
   when length(HexAcc) < 4 ->
     parse_hex_digit(T, Acc, [$D | HexAcc], Delim, NewLines, Chars + 1);
-parse_hex_digit([$E | T], Acc, HexAcc, Delim, NewLines, Chars) 
+parse_hex_digit([$E | T], Acc, HexAcc, Delim, NewLines, Chars)
   when length(HexAcc) < 4 ->
     parse_hex_digit(T, Acc, [$E | HexAcc], Delim, NewLines, Chars + 1);
-parse_hex_digit([$e | T], Acc, HexAcc, Delim, NewLines, Chars) 
+parse_hex_digit([$e | T], Acc, HexAcc, Delim, NewLines, Chars)
   when length(HexAcc) < 4 ->
     parse_hex_digit(T, Acc, [$E | HexAcc], Delim, NewLines, Chars + 1);
-parse_hex_digit([$F | T], Acc, HexAcc, Delim, NewLines, Chars) 
+parse_hex_digit([$F | T], Acc, HexAcc, Delim, NewLines, Chars)
   when length(HexAcc) < 4 ->
     parse_hex_digit(T, Acc, [$F | HexAcc], Delim, NewLines, Chars + 1);
-parse_hex_digit([$f | T], Acc, HexAcc, Delim, NewLines, Chars) 
+parse_hex_digit([$f | T], Acc, HexAcc, Delim, NewLines, Chars)
   when length(HexAcc) < 4 ->
     parse_hex_digit(T, Acc, [$F | HexAcc], Delim, NewLines, Chars + 1);
-parse_hex_digit(Stream, Acc, HexAcc, Delim, NewLines, Chars) 
+parse_hex_digit(Stream, Acc, HexAcc, Delim, NewLines, Chars)
   when length(HexAcc) == 4 ->
     [D1, D2, D3, D4] = HexAcc,
-    Char = ((c2n(D1) * ?LOC_1) + 
+    Char = ((c2n(D1) * ?LOC_1) +
             (c2n(D2) * ?LOC_2) +
             (c2n(D3) * ?LOC_3) +
             (c2n(D4) * ?LOC_4)),

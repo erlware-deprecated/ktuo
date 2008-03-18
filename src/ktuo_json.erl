@@ -1,21 +1,30 @@
+%% -*- mode: Erlang; fill-column: 132; comment-column: 118; -*-
 %%%-------------------------------------------------------------------
-%%% Copyright 2006 Eric Merritt
+%%% Copyright (c) 2006,2007,2008 Erlware
 %%%
-%%% Licensed under the Apache License, Version 2.0 (the "License");  
-%%% you may not use this file except in compliance with the License.
-%%% You may obtain a copy of the License at
+%%% Permission is hereby granted, free of charge, to any
+%%% person obtaining a copy of this software and associated
+%%% documentation files (the "Software"), to deal in the
+%%% Software without restriction, including without limitation
+%%% the rights to use, copy, modify, merge, publish, distribute,
+%%% sublicense, and/or sell copies of the Software, and to permit
+%%% persons to whom the Software is furnished to do so, subject to
+%%% the following conditions:
 %%%
-%%%       http://www.apache.org/licenses/LICENSE-2.0
+%%% The above copyright notice and this permission notice shall
+%%% be included in all copies or substantial portions of the Software.
 %%%
-%%%  Unless required by applicable law or agreed to in writing, software
-%%%  distributed under the License is distributed on an "AS IS" BASIS,
-%%%  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or 
-%%%  implied. See the License for the specific language governing 
-%%%  permissions and limitations under the License.
-%%%
+%%% THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+%%% EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+%%% OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+%%% NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+%%% HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+%%% WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+%%% OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+%%% OTHER DEALINGS IN THE SOFTWARE.
 %%%---------------------------------------------------------------------------
-%%% @author Eric Merritt 
-%%% @doc 
+%%% @author Eric Merritt
+%%% @doc
 %%%  Parses and encodes json for erlang. It expects to have a complete
 %%%  json expression available in the stream. If more then
 %%%  on json expression is in the stream it will parse one expression
@@ -24,7 +33,7 @@
 %%%  value of the form {error, {Reason, Line, Char}}.
 %%% @end
 %%% @copyright (C) 2006
-%%% Created : 19 Dec 2006 by Eric Merritt 
+%%% Created : 19 Dec 2006 by Eric Merritt
 %%%-------------------------------------------------------------------
 -module(ktuo_json).
 
@@ -34,9 +43,9 @@
 
 %%--------------------------------------------------------------------
 %% @spec decode(Stream) -> {ParsedJson, UnparsedRemainder}
-%% 
-%% @doc 
-%%  Parses the incoming stream into valid json objects. 
+%%
+%% @doc
+%%  Parses the incoming stream into valid json objects.
 %%  ``
 %%   JSON   ==   Erlang
 %%   Array       List
@@ -46,7 +55,7 @@
 %%   Ident       String
 %%  ''
 %%  This decode function parses a superset of json, in that single, un
-%%  quoted words are parsed into strings. This makes it easer to 
+%%  quoted words are parsed into strings. This makes it easer to
 %%  use json as a config language.
 %% @end
 %%--------------------------------------------------------------------
@@ -58,8 +67,8 @@ decode(Stream) ->
 
 %%--------------------------------------------------------------------
 %% @spec decode(Stream, NewLines, Chars) -> DecodedValue.
-%% 
-%% @doc 
+%%
+%% @doc
 %%  Decodes the value with the fixed set of newlines and chars.
 %% @end
 %%--------------------------------------------------------------------
@@ -69,10 +78,10 @@ decode(Stream, NewLines, Chars) ->
 
 %%--------------------------------------------------------------------
 %% @spec  encode(DataObjects) -> List.
-%% 
-%% @doc 
-%%  Parses a list of data objects into a list. The list is a deeply 
-%%  nested list and should be flattened if you wish to use it as a 
+%%
+%% @doc
+%%  Parses a list of data objects into a list. The list is a deeply
+%%  nested list and should be flattened if you wish to use it as a
 %%  string. Otherwise, io functions will flatten the list for you.
 %%  ``
 %%   Erlang    ==     JSON
@@ -111,8 +120,8 @@ encode(Data) when is_atom(Data)->
 %%=============================================================================
 %%--------------------------------------------------------------------
 %% @spec encode_string(Value) -> EncodedList.
-%% 
-%% @doc 
+%%
+%% @doc
 %%  Encodes the string according to the rules of json.
 %%  ``
 %%   string
@@ -133,7 +142,7 @@ encode(Data) when is_atom(Data)->
 %%     \n
 %%     \r
 %%     \t
-%%     \u four-hex-digits 
+%%     \u four-hex-digits
 %%
 %% ''
 %% @end
@@ -148,8 +157,8 @@ encode_string(Value) when is_list(Value) ->
 
 %%--------------------------------------------------------------------
 %% @spec encode_integer(Value) -> List.
-%% 
-%% @doc 
+%%
+%% @doc
 %%  Encode the integer according to the precepts of json.
 %%
 %% ``
@@ -157,7 +166,7 @@ encode_string(Value) when is_list(Value) ->
 %%    digit
 %%    digit1-9 digits
 %%    - digit
-%%    - digit1-9 digits 
+%%    - digit1-9 digits
 %%
 %%  digits
 %%    digit
@@ -171,20 +180,20 @@ encode_integer(Value) ->
 
 %%--------------------------------------------------------------------
 %% @spec encode_float(Value) -> List.
-%% 
-%% @doc 
+%%
+%% @doc
 %%  Encode the float according to json rules.
 %%  ``
 %%  number
 %%    int
 %%    int frac
 %%    int exp
-%%    int frac exp 
+%%    int frac exp
 %%  int
 %%    digit
 %%    digit1-9 digits
 %%    - digit
-%%    - digit1-9 digits 
+%%    - digit1-9 digits
 %%  frac
 %%    . digits
 %%  exp
@@ -208,9 +217,9 @@ encode_float(Value) ->
 
 %%--------------------------------------------------------------------
 %% @spec encode_array(Array, Acc) -> List.
-%% 
-%% @doc 
-%%  Encode erlang array according to jsonic precepts 
+%%
+%% @doc
+%%  Encode erlang array according to jsonic precepts
 %% ``
 %%  array
 %%    []
@@ -241,13 +250,13 @@ encode_array([], TAcc) ->
 
 %%--------------------------------------------------------------------
 %% @spec encode_object(PropList, Acc) -> List
-%% 
-%% @doc 
+%%
+%% @doc
 %%  Encode a property list into a json array.
 %% ``
 %%  object
 %%    {}
-%%    { members } 
+%%    { members }
 %%  members
 %%    pair
 %%    pair , members
@@ -272,10 +281,10 @@ encode_array([], TAcc) ->
 %% @end
 %%--------------------------------------------------------------------
 encode_object([{Key, Value} | T], []) ->
-    encode_object(T, [encode_string(Key), $:, 
+    encode_object(T, [encode_string(Key), $:,
                       encode(Value), $}]);
 encode_object([{Key, Value} | T], TAcc) ->
-    encode_object(T, [encode_string(Key), $:, 
+    encode_object(T, [encode_string(Key), $:,
                       encode(Value), $, | TAcc]);
 encode_object([], []) ->
     [${, $}];
@@ -288,29 +297,29 @@ value([$\" | T], NewLines, Chars) ->
 value([$- | T], NewLines, Chars) ->
     ktuo_parse_utils:digit19(T, [$-], NewLines, Chars + 1);
 value([$0 | T], NewLines, Chars) ->
-    ktuo_parse_utils:digit(T, [$0], front, NewLines, Chars + 1); 
+    ktuo_parse_utils:digit(T, [$0], front, NewLines, Chars + 1);
 value([$1 | T], NewLines, Chars) ->
-    ktuo_parse_utils:digit(T, [$1], front, NewLines, Chars + 1); 
+    ktuo_parse_utils:digit(T, [$1], front, NewLines, Chars + 1);
 value([$2 | T], NewLines, Chars) ->
-    ktuo_parse_utils:digit(T, [$2], front, NewLines, Chars + 1); 
+    ktuo_parse_utils:digit(T, [$2], front, NewLines, Chars + 1);
 value([$3 | T], NewLines, Chars) ->
-    ktuo_parse_utils:digit(T, [$3], front, NewLines, Chars + 1); 
+    ktuo_parse_utils:digit(T, [$3], front, NewLines, Chars + 1);
 value([$4 | T], NewLines, Chars) ->
-    ktuo_parse_utils:digit(T, [$4], front, NewLines, Chars + 1); 
+    ktuo_parse_utils:digit(T, [$4], front, NewLines, Chars + 1);
 value([$5 | T], NewLines, Chars) ->
-    ktuo_parse_utils:digit(T, [$5], front, NewLines, Chars + 1); 
+    ktuo_parse_utils:digit(T, [$5], front, NewLines, Chars + 1);
 value([$6 | T], NewLines, Chars) ->
-    ktuo_parse_utils:digit(T, [$6], front, NewLines, Chars + 1); 
+    ktuo_parse_utils:digit(T, [$6], front, NewLines, Chars + 1);
 value([$7 | T], NewLines, Chars) ->
-    ktuo_parse_utils:digit(T, [$7], front, NewLines, Chars + 1); 
+    ktuo_parse_utils:digit(T, [$7], front, NewLines, Chars + 1);
 value([$8 | T], NewLines, Chars) ->
-    ktuo_parse_utils:digit(T, [$8], front, NewLines, Chars + 1); 
+    ktuo_parse_utils:digit(T, [$8], front, NewLines, Chars + 1);
 value([$9 | T], NewLines, Chars) ->
-    ktuo_parse_utils:digit(T, [$9], front, NewLines, Chars + 1); 
+    ktuo_parse_utils:digit(T, [$9], front, NewLines, Chars + 1);
 value([$[ | T], NewLines, Chars) ->
-    array_body(T, [], NewLines, Chars + 1); 
+    array_body(T, [], NewLines, Chars + 1);
 value([${ | T], NewLines, Chars) ->
-    object_body(T, dict:new(), NewLines, Chars + 1); 
+    object_body(T, dict:new(), NewLines, Chars + 1);
 value([$t, $r, $u, $e | T], NewLines, Chars) ->
     {true, T, {NewLines, Chars + 4}};
 value([$f, $a, $l, $s, $e | T], NewLines, Chars) ->
@@ -318,11 +327,11 @@ value([$f, $a, $l, $s, $e | T], NewLines, Chars) ->
 value([$n, $u, $l, $l | T], NewLines, Chars) ->
     {null, T, {NewLines, Chars + 4}};
 value([$\s | T], NewLines, Chars) ->
-    value(T, NewLines, Chars + 1); 
+    value(T, NewLines, Chars + 1);
 value([$\t | T], NewLines, Chars) ->
-    value(T, NewLines, Chars + 1); 
+    value(T, NewLines, Chars + 1);
 value([$\r | T], NewLines, _Chars) ->
-    value(T, NewLines + 1, 0); 
+    value(T, NewLines + 1, 0);
 value([$\n | T], NewLines, _Chars) ->
     value(T, NewLines + 1, 0);
 value(Stream, NewLines, Chars) ->
@@ -363,8 +372,8 @@ object_body(Else, Acc, NewLines, Chars) ->
 
 %%--------------------------------------------------------------------
 %% @spec do_key(Stream, Acc, NewLines, Chars) -> Error | {Prop, Rest, N, C}.
-%% 
-%% @doc 
+%%
+%% @doc
 %%  Parse out the key. When that is complete parse out the value.
 %% @end
 %%--------------------------------------------------------------------
@@ -377,10 +386,10 @@ do_key(Stream, Acc, NewLines, Chars) ->
     end.
 
 %%--------------------------------------------------------------------
-%% @spec do_value(Key, Stream, NewLines, Chars) -> Error | 
+%% @spec do_value(Key, Stream, NewLines, Chars) -> Error |
 %%   {PropList, Rest, {NewLines, Chars}}.
-%% 
-%% @doc 
+%%
+%% @doc
 %%  Parse out the value. Then continue with the object.
 %% @end
 %%--------------------------------------------------------------------
@@ -389,21 +398,21 @@ do_value(Key, Stream, Acc, NewLines, Chars) ->
         {Rest, NLines, NChars} ->
             case value(Rest, NLines, NChars) of
                 {Value, Rest1, {NLines1, NChars1}} ->
-                    object_body(Rest1, dict:store(Key, Value, Acc), 
+                    object_body(Rest1, dict:store(Key, Value, Acc),
                                 NLines1, NChars1);
                 Else ->
                     Else
             end;
-        Else1 -> 
+        Else1 ->
             Else1
     end.
 
 %%--------------------------------------------------------------------
 %% @spec find(Delim, Stream, NewLines, Chars) -> Error | {Rest, NewLines,
 %%          Chars}.
-%% 
-%% @doc 
-%%  Make an effort to run to the next instance of the delimeter. 
+%%
+%% @doc
+%%  Make an effort to run to the next instance of the delimeter.
 %%  Only whitespace and newlines are expected to be between the start
 %%  and the delim.
 %% @end
@@ -424,8 +433,8 @@ find(Delim, _Rest, NewLines, Chars) ->
 
 %%--------------------------------------------------------------------
 %% @spec key(Stream, NewLines, Chars) -> {Key, NewLine, Chars} | Error.
-%% 
-%% @doc 
+%%
+%% @doc
 %%  Parse the key as part of the object.
 %% @end
 %%--------------------------------------------------------------------
@@ -444,11 +453,11 @@ key(Stream, NewLines, Chars) ->
 
 
 %%--------------------------------------------------------------------
-%% @spec ident(Stream, Acc, NewLines, Chars) -> {Ident, Rest, N, L} | 
+%% @spec ident(Stream, Acc, NewLines, Chars) -> {Ident, Rest, N, L} |
 %%   Error.
-%% 
-%% @doc 
-%%  Parse a single word ident from the stream. Idents may be 
+%%
+%% @doc
+%%  Parse a single word ident from the stream. Idents may be
 %%  of the form [a-z][a-zA-Z0-9_]*
 %% @end
 %%--------------------------------------------------------------------
@@ -487,14 +496,14 @@ encode_number_test() ->
     ?assertMatch("430", lists:flatten(encode(430))),
     ?assertMatch("4303432", lists:flatten(encode(4303432))),
     ?assertMatch("4.30000000000000000000e+01", lists:flatten(encode(43.00))),
-    ?assertMatch("3.22232219999999983884e+02", 
+    ?assertMatch("3.22232219999999983884e+02",
                  lists:flatten(encode(322.23222))).
 
 encode_array_test() ->
     ?assertMatch("[33,43,53]", lists:flatten(encode([33, 43, 53]))),
-    ?assertMatch("[\"String\",34,\"song\"]", lists:flatten(encode([{string, 
+    ?assertMatch("[\"String\",34,\"song\"]", lists:flatten(encode([{string,
                                                                     "String"},
-                                                                   34, 
+                                                                   34,
                                                                    song]))),
     ?assertMatch("[{\"Goodbye\":true,\"Hello\":44},43,54]",
                  lists:flatten(encode([[{{string, "Hello"}, 44},
