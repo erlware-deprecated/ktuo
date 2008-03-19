@@ -45,7 +45,6 @@
 %% API
 %%=============================================================================
 %%--------------------------------------------------------------------
-%% @spec stringish_body(Delim, Stream, Acc) -> {String, Rest}.
 %%
 %% @doc
 %%  Parses a string body into a string.
@@ -53,7 +52,7 @@
 %%  detected. So strings should be of the form
 %%
 %%  this is a string body"
-%%
+%% @spec stringish_body(Delim, Stream, Acc, NewLines, Chars) -> {String, Rest}
 %% @end
 %%--------------------------------------------------------------------
 stringish_body(Delim, [$\\, $\" | T], Acc, NewLines, Chars) ->
@@ -86,11 +85,11 @@ stringish_body(_Delim, [], _Acc, NewLines, Chars) ->
     {error, {"Found end of file while parsing string", NewLines, Chars}}.
 
 %%--------------------------------------------------------------------
-%% @spec digit19(Stream, Acc, NewLines, Chars) -> Acc2 | Error.
-%%
 %% @doc
 %%  Parse from the stream ensuring that the digits has a length of
 %%  between 1 and 9.
+%%
+%% @spec digit19(Stream, Acc, NewLines, Chars) -> Acc2 | Error
 %% @end
 %%--------------------------------------------------------------------
 digit19([$1 | T], Acc, NewLines, Chars) ->
@@ -116,10 +115,10 @@ digit19(Else, Acc, NewLines, Chars) ->
 
 
 %%--------------------------------------------------------------------
-%% @spec digit(Stream, Acc, Next) -> {Res, Rest}.
-%%
 %% @doc
 %%  Parse out the specified digit set.
+%%
+%% @spec digit(Stream, Acc, Next, NewLines, Chars) -> {Res, Rest}
 %% @end
 %%--------------------------------------------------------------------
 digit([$0 | T], Acc, Next, NewLines, Chars) ->

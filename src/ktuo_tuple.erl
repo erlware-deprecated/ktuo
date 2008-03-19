@@ -67,10 +67,10 @@ decode(Stream, NewLines, Chars) ->
 %% Internal Functions
 %%=============================================================================
 %%--------------------------------------------------------------------
-%% @spec value(Stream, NewLines, Chars) -> {Value, Rest, {N, L}}.
-%%
 %% @doc
 %%  Parse a tuple value.
+%%
+%% @spec value(Stream, NewLines, Chars) -> {Value, Rest, {N, L}}
 %% @end
 %%--------------------------------------------------------------------
 value([$\" | T], NewLines, Chars) ->
@@ -121,10 +121,10 @@ value(Stream, NewLines, Chars) ->
 
 
 %%--------------------------------------------------------------------
-%% @spec list_body(Stream, Acc) -> {List, Rest, {N, L}} | Error.
-%%
 %% @doc
 %%  Parse a list body. A list is [ elements, ..].
+%%
+%% @spec list_body(Stream, Acc, NewLines, Chars) -> {List, Rest, {N, L}} | Error
 %% @end
 %%--------------------------------------------------------------------
 list_body([$] | T], Acc, NewLines, Chars) ->
@@ -148,10 +148,10 @@ list_body(Stream, Acc, NewLines, Chars) ->
     end.
 
 %%--------------------------------------------------------------------
-%% @spec tuple_body(Stream, Acc) -> {Tuple, Rest, {N, C}} | Error.
-%%
 %% @doc
 %%  Parse the tuple body. Tuple bodies are of the form { element, ..}.
+%%
+%% @spec tuple_body(Stream, Acc, NewLines, Chars) -> {Tuple, Rest, {N, C}} | Error
 %% @end
 %%--------------------------------------------------------------------
 tuple_body([$} | T], Acc, NewLines, Chars) ->
@@ -176,10 +176,10 @@ tuple_body(Stream, Acc, NewLines, Chars) ->
 
 
 %%--------------------------------------------------------------------
-%% @spec bare_atom(Stream, Acc) -> {Atom, Rest, {N, C}} | Error.
-%%
 %% @doc
 %%  Parse an atom that doesn't have single quote delimeters.
+%%
+%% @spec bare_atom(Stream, Acc, NewLines, Chars) -> {Atom, Rest, {N, C}} | Error
 %% @end
 %%--------------------------------------------------------------------
 bare_atom([H | T], Acc, NewLines, Chars) when H >= $a, H =< $z ->

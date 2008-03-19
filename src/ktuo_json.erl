@@ -66,10 +66,10 @@ decode(Stream) ->
 
 
 %%--------------------------------------------------------------------
-%% @spec decode(Stream, NewLines, Chars) -> DecodedValue.
-%%
 %% @doc
 %%  Decodes the value with the fixed set of newlines and chars.
+%%
+%% @spec decode(Stream, NewLines, Chars) -> DecodedValue
 %% @end
 %%--------------------------------------------------------------------
 decode(Stream, NewLines, Chars) ->
@@ -77,8 +77,6 @@ decode(Stream, NewLines, Chars) ->
 
 
 %%--------------------------------------------------------------------
-%% @spec  encode(DataObjects) -> List.
-%%
 %% @doc
 %%  Parses a list of data objects into a list. The list is a deeply
 %%  nested list and should be flattened if you wish to use it as a
@@ -91,6 +89,8 @@ decode(Stream, NewLines, Chars) ->
 %%   PropList         Object
 %%   Number           Number
 %%  ''
+%%
+%% @spec  encode(DataObjects) -> List
 %% @end
 %%--------------------------------------------------------------------
 encode(Data = [{string, _} | _]) ->
@@ -119,7 +119,6 @@ encode(Data) when is_atom(Data)->
 %% Internal Functions
 %%=============================================================================
 %%--------------------------------------------------------------------
-%% @spec encode_string(Value) -> EncodedList.
 %%
 %% @doc
 %%  Encodes the string according to the rules of json.
@@ -145,6 +144,8 @@ encode(Data) when is_atom(Data)->
 %%     \u four-hex-digits
 %%
 %% ''
+%%
+%% @spec encode_string(Value) -> EncodedList
 %% @end
 %%--------------------------------------------------------------------
 encode_string({string, Value}) ->
@@ -156,8 +157,6 @@ encode_string(Value) when is_list(Value) ->
 
 
 %%--------------------------------------------------------------------
-%% @spec encode_integer(Value) -> List.
-%%
 %% @doc
 %%  Encode the integer according to the precepts of json.
 %%
@@ -172,6 +171,8 @@ encode_string(Value) when is_list(Value) ->
 %%    digit
 %%    digit digits
 %% ''
+%%
+%% @spec encode_integer(Value) -> List
 %% @end
 %%--------------------------------------------------------------------
 encode_integer(Value) ->
@@ -179,8 +180,6 @@ encode_integer(Value) ->
 
 
 %%--------------------------------------------------------------------
-%% @spec encode_float(Value) -> List.
-%%
 %% @doc
 %%  Encode the float according to json rules.
 %%  ``
@@ -209,6 +208,8 @@ encode_integer(Value) ->
 %%    E+
 %%    E-
 %% ''
+%%
+%% @spec encode_float(Value) -> List
 %% @end
 %%--------------------------------------------------------------------
 encode_float(Value) ->
@@ -216,11 +217,9 @@ encode_float(Value) ->
 
 
 %%--------------------------------------------------------------------
-%% @spec encode_array(Array, Acc) -> List.
-%%
 %% @doc
 %%  Encode erlang array according to jsonic precepts
-%% ``
+%% <pre>
 %%  array
 %%    []
 %%    [ elements ]
@@ -235,7 +234,8 @@ encode_float(Value) ->
 %%    true
 %%    false
 %%    null
-%% ``
+%% </pre>
+%% @spec encode_array(Array, Acc) -> List
 %% @end
 %%--------------------------------------------------------------------
 encode_array([H | T], []) ->
@@ -371,10 +371,10 @@ object_body(Else, Acc, NewLines, Chars) ->
 
 
 %%--------------------------------------------------------------------
-%% @spec do_key(Stream, Acc, NewLines, Chars) -> Error | {Prop, Rest, N, C}.
-%%
 %% @doc
 %%  Parse out the key. When that is complete parse out the value.
+%%
+%% @spec do_key(Stream, Acc, NewLines, Chars) -> Error | {Prop, Rest, N, C}
 %% @end
 %%--------------------------------------------------------------------
 do_key(Stream, Acc, NewLines, Chars) ->
@@ -386,11 +386,11 @@ do_key(Stream, Acc, NewLines, Chars) ->
     end.
 
 %%--------------------------------------------------------------------
-%% @spec do_value(Key, Stream, NewLines, Chars) -> Error |
-%%   {PropList, Rest, {NewLines, Chars}}.
-%%
 %% @doc
 %%  Parse out the value. Then continue with the object.
+%%
+%% @spec do_value(Key, Stream, Acc, NewLines, Chars) -> Error |
+%%   {PropList, Rest, {NewLines, Chars}}
 %% @end
 %%--------------------------------------------------------------------
 do_value(Key, Stream, Acc, NewLines, Chars) ->
@@ -408,13 +408,13 @@ do_value(Key, Stream, Acc, NewLines, Chars) ->
     end.
 
 %%--------------------------------------------------------------------
-%% @spec find(Delim, Stream, NewLines, Chars) -> Error | {Rest, NewLines,
-%%          Chars}.
-%%
 %% @doc
 %%  Make an effort to run to the next instance of the delimeter.
 %%  Only whitespace and newlines are expected to be between the start
 %%  and the delim.
+%%
+%% @spec find(Delim, Stream, NewLines, Chars) -> Error | {Rest, NewLines,
+%%          Chars}
 %% @end
 %%--------------------------------------------------------------------
 find(Delim, [Delim | T], NewLines, Chars) ->
@@ -432,10 +432,10 @@ find(Delim, _Rest, NewLines, Chars) ->
 
 
 %%--------------------------------------------------------------------
-%% @spec key(Stream, NewLines, Chars) -> {Key, NewLine, Chars} | Error.
-%%
 %% @doc
 %%  Parse the key as part of the object.
+%%
+%% @spec key(Stream, NewLines, Chars) -> {Key, NewLine, Chars} | Error
 %% @end
 %%--------------------------------------------------------------------
 key([$\" | T], NewLines, Chars) ->
@@ -453,12 +453,12 @@ key(Stream, NewLines, Chars) ->
 
 
 %%--------------------------------------------------------------------
-%% @spec ident(Stream, Acc, NewLines, Chars) -> {Ident, Rest, N, L} |
-%%   Error.
-%%
 %% @doc
 %%  Parse a single word ident from the stream. Idents may be
 %%  of the form [a-z][a-zA-Z0-9_]*
+%%
+%% @spec ident(Stream, Acc, NewLines, Chars) -> {Ident, Rest, N, L} |
+%%   Error
 %% @end
 %%--------------------------------------------------------------------
 ident([H | T], Acc, NewLines, Chars) when H >= $a, H =< $z ->
