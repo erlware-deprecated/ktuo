@@ -31,6 +31,29 @@
 %%%  and return the result and the rest of the stream which you may then
 %%%  call parse on again. If a failure occures. it will return a error
 %%%  value of the form {error, {Reason, Line, Char}}.
+%%%
+%%%  Parsing strings into erlang.
+%%%  @type key() = string()
+%%%  @type value() = object() | number() | array() | string() | bool() | null()
+%%%  @type object() = {obj, [{key(), value()}]}
+%%%  @type array() = [value()]
+%%%  @type number() = int() | float()
+%%%  @type string() = binary()
+%%%  @type bool() = true | false
+%%%  @type null() = null
+%%%
+%%%  Parsing erlang into json
+%%%
+%%%  @type in_string() = binary()
+%%%  @type in_array() = [in_value()]
+%%%  @type in_atom() = string()
+%%%  @type in_object() = {obj, [{string(), in_value()}]
+%%%  @type in_number() = int() | float()
+%%%  @type in_bool() = true | false
+%%%  @type in_null() = null
+%%%  @type in_value() = in_string() | in_array() | in_atom() | in_object()
+%%%                     | in_number() | in_bool() | in_null()
+%%%
 %%% @end
 %%% @copyright (C) 2006
 %%% Created : 19 Dec 2006 by Eric Merritt
@@ -42,26 +65,19 @@
 -export([decode/1, decode/3, encode/1]).
 
 %%--------------------------------------------------------------------
-%% @spec decode(Stream) -> {ParsedJson, UnparsedRemainder}
-%%
 %% @doc
 %%  Parses the incoming stream into valid json objects.
-%%  ``
-%%   JSON   ==   Erlang
-%%   Array       List
-%%   String      List
-%%   Number      Number
-%%   Object      PropList
-%%   Ident       String
-%%  ''
+%%
 %%  This decode function parses a superset of json, in that single, un
 %%  quoted words are parsed into strings. This makes it easer to
 %%  use json as a config language.
+%%
+%% @spec decode(Stream) -> {JSONValue::value(), UnparsedRemainder}
 %% @end
 %%--------------------------------------------------------------------
+decode(Stream) when is_list(Stream) ->
+    decode(list_to_binary(Stream), 0, 0);
 decode(Stream) when is_binary(Stream) ->
-    decode(binary_to_list(Stream), 0, 0);
-decode(Stream) ->
     decode(Stream, 0, 0).
 
 
@@ -69,7 +85,8 @@ decode(Stream) ->
 %% @doc
 %%  Decodes the value with the fixed set of newlines and chars.
 %%
-%% @spec decode(Stream, NewLines, Chars) -> DecodedValue
+%% @spec decode(Stream, NewLines, Chars) ->
+%%   {DecodedValue::value(), UnparsedRemainder}
 %% @end
 %%--------------------------------------------------------------------
 decode(Stream, NewLines, Chars) ->
@@ -81,25 +98,15 @@ decode(Stream, NewLines, Chars) ->
 %%  Parses a list of data objects into a list. The list is a deeply
 %%  nested list and should be flattened if you wish to use it as a
 %%  string. Otherwise, io functions will flatten the list for you.
-%%  ``
-%%   Erlang    ==     JSON
-%%   {string, Val}    String
-%%   List             Array
-%%   Atom             String
-%%   PropList         Object
-%%   Number           Number
-%%  ''
 %%
-%% @spec  encode(DataObjects) -> List
+%% @spec encode(DataObjects::in_value()) -> Output::string()
 %% @end
 %%--------------------------------------------------------------------
-encode(Data = [{string, _} | _]) ->
-    lists:reverse(encode_array(Data, []));
-encode(Data = [{_, _} | _]) ->
-    encode_object(Data, []);
 encode(Data) when is_list(Data) ->
     lists:reverse(encode_array(Data, []));
-encode({string, Data}) ->
+encode({obj, Value}) ->
+    encode_object(Value, []);
+encode(Data) when is_binary(Data) ->
     encode_string(Data);
 encode(Data) when is_integer(Data) ->
     encode_integer(Data);
@@ -145,16 +152,47 @@ encode(Data) when is_atom(Data)->
 %%
 %% ''
 %%
-%% @spec encode_string(Value) -> EncodedList
+%% @spec encode_string(Value::in_string()) -> EncodedList::string()
+%% @private
 %% @end
 %%--------------------------------------------------------------------
-encode_string({string, Value}) ->
-    [$\", Value, $\"];
+encode_string(Value) when is_binary(Value) ->
+    [$\", escape_string(binary_to_list(Value), []), $\"];
 encode_string(Value) when is_atom(Value) ->
-    [$\", atom_to_list(Value), $\"];
+    [$\", escape_string(atom_to_list(Value), []), $\"];
 encode_string(Value) when is_list(Value) ->
-    [$\", Value, $\"].
+    [$\", escape_string(Value, []), $\"].
 
+%%--------------------------------------------------------------------
+%% @doc
+%% escapes a string as required for the json
+%%
+%% @spec escape_string(Value::list()) -> EscapedString::string()
+%% @private
+%% @end
+%%--------------------------------------------------------------------
+escape_string([$\\, Char | Rest], Acc) ->
+    escape_string(Rest, [Char, $\\ | Acc]);
+escape_string([$\" | Rest], Acc) ->
+    escape_string(Rest, [$\", $\\ | Acc]);
+escape_string([$\\ | Rest], Acc) ->
+    escape_string(Rest, [$\\, $\\ | Acc]);
+escape_string([$\/ | Rest], Acc) ->
+    escape_string(Rest, [$\/, $\\ | Acc]);
+escape_string([$\b | Rest], Acc) ->
+    escape_string(Rest, [$b, $\\ | Acc]);
+escape_string([$\f | Rest], Acc) ->
+    escape_string(Rest, [$f, $\\ | Acc]);
+escape_string([$\n | Rest], Acc) ->
+    escape_string(Rest, [$n, $\\ | Acc]);
+escape_string([$\r | Rest], Acc) ->
+    escape_string(Rest, [$r, $\\ | Acc]);
+escape_string([$\t | Rest], Acc) ->
+    escape_string(Rest, [$t, $\\ | Acc]);
+escape_string([N | Rest], Acc) ->
+    escape_string(Rest, [N | Acc]);
+escape_string([], Acc) ->
+    lists:reverse(Acc).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -172,12 +210,12 @@ encode_string(Value) when is_list(Value) ->
 %%    digit digits
 %% ''
 %%
-%% @spec encode_integer(Value) -> List
+%% @spec encode_integer(Value::integer()) -> List::string()
+%% @private
 %% @end
 %%--------------------------------------------------------------------
-encode_integer(Value) ->
+encode_integer(Value) when is_integer(Value) ->
     integer_to_list(Value).
-
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -209,10 +247,11 @@ encode_integer(Value) ->
 %%    E-
 %% ''
 %%
-%% @spec encode_float(Value) -> List
+%% @spec encode_float(Value::float()) -> List::string()
+%% @private
 %% @end
 %%--------------------------------------------------------------------
-encode_float(Value) ->
+encode_float(Value) when is_float(Value) ->
     float_to_list(Value).
 
 
@@ -235,7 +274,8 @@ encode_float(Value) ->
 %%    false
 %%    null
 %% </pre>
-%% @spec encode_array(Array, Acc) -> List
+%% @spec encode_array(Array::list(), Acc::string()) -> List::string()
+%% @private
 %% @end
 %%--------------------------------------------------------------------
 encode_array([H | T], []) ->
@@ -249,7 +289,6 @@ encode_array([], TAcc) ->
 
 
 %%--------------------------------------------------------------------
-%% @spec encode_object(PropList, Acc) -> List
 %%
 %% @doc
 %%  Encode a property list into a json array.
@@ -278,6 +317,7 @@ encode_array([], TAcc) ->
 %%    null
 %%
 %% ''
+%% @spec encode_object(PropList, Acc::string()) -> List::string()
 %% @end
 %%--------------------------------------------------------------------
 encode_object([{Key, Value} | T], []) ->
@@ -291,7 +331,14 @@ encode_object([], []) ->
 encode_object([], TAcc) ->
     [${ | TAcc].
 
-
+%%--------------------------------------------------------------------
+%% @doc
+%% Parses a json value out into system
+%%
+%% @spec value(Parsee::string(), NewLines::integer(), Chars::string() -> value()
+%% @private
+%% @end
+%%--------------------------------------------------------------------
 value([$\" | T], NewLines, Chars) ->
     ktuo_parse_utils:stringish_body($\", T, [], NewLines, Chars + 1);
 value([$- | T], NewLines, Chars) ->
@@ -319,7 +366,7 @@ value([$9 | T], NewLines, Chars) ->
 value([$[ | T], NewLines, Chars) ->
     array_body(T, [], NewLines, Chars + 1);
 value([${ | T], NewLines, Chars) ->
-    object_body(T, dict:new(), NewLines, Chars + 1);
+    object_body(T, [], NewLines, Chars + 1);
 value([$t, $r, $u, $e | T], NewLines, Chars) ->
     {true, T, {NewLines, Chars + 4}};
 value([$f, $a, $l, $s, $e | T], NewLines, Chars) ->
@@ -355,7 +402,7 @@ array_body(Stream, Acc, NewLines, Chars) ->
     array_body(Rest, [Value | Acc], NLines, NChars).
 
 object_body([$} | T], Acc, NewLines, Chars) ->
-    {Acc, T, {NewLines, Chars + 1}};
+    {{obj, Acc}, T, {NewLines, Chars + 1}};
 object_body([$, | T], Acc, NewLines, Chars) ->
     object_body(T, Acc, NewLines, Chars + 1);
 object_body([$\s | T], Acc, NewLines, Chars) ->
@@ -398,7 +445,7 @@ do_value(Key, Stream, Acc, NewLines, Chars) ->
         {Rest, NLines, NChars} ->
             case value(Rest, NLines, NChars) of
                 {Value, Rest1, {NLines1, NChars1}} ->
-                    object_body(Rest1, dict:store(Key, Value, Acc),
+                    object_body(Rest1, [{Key, Value} |  Acc],
                                 NLines1, NChars1);
                 Else ->
                     Else
@@ -413,7 +460,7 @@ do_value(Key, Stream, Acc, NewLines, Chars) ->
 %%  Only whitespace and newlines are expected to be between the start
 %%  and the delim.
 %%
-%% @spec find(Delim, Stream, NewLines, Chars) -> Error | {Rest, NewLines,
+%%d @spec find(Delim, Stream, NewLines, Chars) -> Error | {Rest, NewLines,
 %%          Chars}
 %% @end
 %%--------------------------------------------------------------------
@@ -489,7 +536,7 @@ ident(_Else, _Acc, NewLines, Chars)  ->
 %% Unit tests
 %%=============================================================================
 encode_string_test() ->
-    ?assertMatch("\"Hello\"", lists:flatten(encode({string, "Hello"}))),
+    ?assertMatch("\"Hello\"", lists:flatten(encode(<<"Hello">>))),
     ?assertMatch("\"hello\"", lists:flatten(encode('hello'))).
 
 encode_number_test() ->
@@ -501,13 +548,12 @@ encode_number_test() ->
 
 encode_array_test() ->
     ?assertMatch("[33,43,53]", lists:flatten(encode([33, 43, 53]))),
-    ?assertMatch("[\"String\",34,\"song\"]", lists:flatten(encode([{string,
-                                                                    "String"},
+    ?assertMatch("[\"String\",34,\"song\"]", lists:flatten(encode([<<"String">>,
                                                                    34,
                                                                    song]))),
     ?assertMatch("[{\"Goodbye\":true,\"Hello\":44},43,54]",
-                 lists:flatten(encode([[{{string, "Hello"}, 44},
-                                        {{string, "Goodbye"}, true}],
+                 lists:flatten(encode([[{<<"Hello">>, 44},
+                                        {<<"Goodbye">>, true}],
                                        43, 54]))).
 
 boolean_test() ->
