@@ -32,22 +32,23 @@
 %%%  call parse on again. If a failure occures. it will return a error
 %%%  value of the form {error, {Reason, Line, Char}}.
 %%%
+%%%
 %%%  Parsing strings into erlang.
 %%%  @type key() = string()
-%%%  @type value() = object() | number() | array() | string() | bool() | null()
+%%%  @type value() = object() | json_number() | array() | json_string() | json_bool() | null()
 %%%  @type object() = {obj, [{key(), value()}]}
 %%%  @type array() = [value()]
-%%%  @type number() = int() | float()
-%%%  @type string() = binary()
-%%%  @type bool() = true | false
-%%%  @type null() = null
+%%%  @type json_number() = int() | float()
+%%%  @type json_string() = binary()
+%%%  @type json_bool() = true | false
+
 %%%
 %%%  Parsing erlang into json
 %%%
 %%%  @type in_string() = binary()
 %%%  @type in_array() = [in_value()]
 %%%  @type in_atom() = string()
-%%%  @type in_object() = {obj, [{string(), in_value()}]
+%%%  @type in_object() = {obj, [{string(), in_value()}]}
 %%%  @type in_number() = int() | float()
 %%%  @type in_bool() = true | false
 %%%  @type in_null() = null
@@ -167,7 +168,7 @@ encode_string(Value) when is_list(Value) ->
 %% @doc
 %% escapes a string as required for the json
 %%
-%% @spec escape_string(Value::list()) -> EscapedString::string()
+%% @spec escape_string(Value::list(), Acc::list()) -> EscapedString::string()
 %% @private
 %% @end
 %%--------------------------------------------------------------------
@@ -335,7 +336,7 @@ encode_object([], TAcc) ->
 %% @doc
 %% Parses a json value out into system
 %%
-%% @spec value(Parsee::string(), NewLines::integer(), Chars::string() -> value()
+%% @spec value(Parsee::string(), NewLines::integer(), Chars::string()) -> value()
 %% @private
 %% @end
 %%--------------------------------------------------------------------
