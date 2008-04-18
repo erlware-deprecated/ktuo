@@ -33,7 +33,7 @@
 %%% @copyright (C) 2006
 %%% Created : 19 Dec 2006 by Eric Merritt
 %%%-------------------------------------------------------------------
--module(ktuo_tuple).
+-module(ktt_decode).
 
 -include("eunit.hrl").
 

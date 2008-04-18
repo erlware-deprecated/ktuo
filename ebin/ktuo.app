@@ -1,9 +1,10 @@
 %% -*- mode:Erlang; fill-column:79 -*-
 {application, ktuo,
  [{description, "Json/Tuple parser encoder for Erlang"},
-  {vsn, "0.3.0.1"},
-  {modules, [ktuo_json,
-             ktuo_tuple,
+  {vsn, "0.4.0.0"},
+  {modules, [ktj_encode,
+             ktj_decode,
+             ktt_decode,
              ktuo_parse_utils]},
   {registered, []},
   {applications, [kernel, stdlib]}]}.

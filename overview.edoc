@@ -1,0 +1,18 @@
+@title Welcome to the KTUO JSON Application
+@doc
+
+<p>
+This application provides a straitforward and easy way to handle JSON encoding and decoding. The relevent modules are ktj_encode and ktj_decode. ktj_encode will encode json into an IO list while ktj_decode will decode lists or binaries.
+</p>
+
+<p>
+It expects to have a complete
+json expression available in the stream. If more then
+on json expression is in the stream it will parse one expression
+and return the result and the rest of the stream which you may then
+call parse on again. If a failure occures. it will return a error
+value of the form {error, {Reason, Line, Char}}.
+</p>
+
+@author Eric Merritt
+@copyright 2007, 2008 Erlware
