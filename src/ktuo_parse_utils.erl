@@ -216,17 +216,8 @@ parse_hex_digit([$f | T], Acc, HexAcc, Delim, NewLines, Chars)
 parse_hex_digit(Stream, Acc, HexAcc, Delim, NewLines, Chars)
   when length(HexAcc) == 4 ->
     [D1, D2, D3, D4] = HexAcc,
-    Char = ((c2n(D1) * ?LOC_1) +
-            (c2n(D2) * ?LOC_2) +
-            (c2n(D3) * ?LOC_3) +
-            (c2n(D4) * ?LOC_4)),
+    Char = hexlist_to_integer([D4, D3, D2, D1]),
     stringish_body(Delim, Stream, [Char | Acc], NewLines, Chars).
-
-
-c2n(Char) when Char < 58 ->
-    Char - 48;
-c2n(Char) ->
-    Char - 54.
 
 
 decimal([$.| T], Acc, NewLines, Chars) when length(T) > 0 ->
@@ -264,9 +255,47 @@ digit_next(Stream, Acc, decimal, NewLines, Chars) ->
 digit_next(Stream, Acc, exponent, NewLines, Chars) ->
     float_end(Stream, Acc, NewLines, Chars).
 
+hexlist_to_integer([Size]) when Size >= 48 , Size =< 57 ->
+   Size - 48;
+%% A-F
+hexlist_to_integer([Size]) when Size >= 65 , Size =< 70 ->
+    Size - 55;
+%% a-f
+hexlist_to_integer([Size]) when Size >= 97 , Size =< 102 ->
+    Size - 87;
+hexlist_to_integer([_Size]) ->
+    not_a_num;
+
+hexlist_to_integer(Size) ->
+    Len = string:span(Size, "1234567890abcdefABCDEF"),
+    hexlist_to_integer2(Size, 16 bsl (4 *(Len-2)),0).
+
+hexlist_to_integer2([],_Pos,Sum)->
+    Sum;
+hexlist_to_integer2([HexVal | HexString], Pos, Sum)
+  when HexVal >= 48, HexVal =< 57 ->
+    hexlist_to_integer2(HexString, Pos bsr 4, Sum + ((HexVal-48) * Pos));
+hexlist_to_integer2([HexVal | HexString], Pos, Sum)
+  when HexVal >= 65, HexVal =<70 ->
+    hexlist_to_integer2(HexString, Pos bsr 4, Sum + ((HexVal-55) * Pos));
+hexlist_to_integer2([HexVal | HexString], Pos, Sum)
+  when HexVal>=97, HexVal=<102 ->
+    hexlist_to_integer2(HexString, Pos bsr 4, Sum + ((HexVal-87) * Pos));
+hexlist_to_integer2(_AfterHexString, _Pos, Sum)->
+    Sum.
+
+
 %%=============================================================================
 %% Unit tests
 %%=============================================================================
+hex_test() ->
+    ?assertMatch(47, hexlist_to_integer("002f")),
+    ?assertMatch(35, hexlist_to_integer("0023")),
+    ?assertMatch(0, hexlist_to_integer("0000")),
+    ?assertMatch(5, hexlist_to_integer("0005")),
+    ?assertMatch(11, hexlist_to_integer("000B")),
+    ?assertMatch(16, hexlist_to_integer("0010")).
+
 number_test() ->
     ?assertMatch({44, [], {0, 2}}, digit("44", [], front, 0, 0)),
     ?assertMatch({-44, [], {0, 3}}, digit("44", [$-], front, 0, 1)),

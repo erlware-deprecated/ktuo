@@ -69,7 +69,7 @@ decode(Stream) when is_binary(Stream) ->
 %%  Decodes the value with the fixed set of newlines and chars.
 %%
 %% @spec (Stream, NewLines, Chars) ->
-%%   {DecodedValue::value(), UnparsedRemainder}
+%%   {DecodedValue::value(), UnparsedRemainder, CharRemainder}
 %% @end
 %%--------------------------------------------------------------------
 decode(Stream, NewLines, Chars) ->
@@ -297,4 +297,13 @@ ident_test() ->
     ?assertMatch({"bock", [$:], {0, 4}}, value("bock:", 0, 0)),
     ?assertMatch({"bock", [${], {0, 4}}, value("bock{", 0, 0)),
     ?assertMatch({"bock", [$[], {0, 4}}, value("bock[", 0, 0)).
+
+config_test() ->
+    {Value, _, _} = decode("{\"build\": {\"start_dir\": \"\\u002fhome\\u002fsomething\\u002fworkspace\\u002fsinan\\u002fclient\"}}"),
+    ?assertMatch({obj,
+                  [{"build",
+                    {obj,
+                     [{"start_dir",
+                       "/home/something/workspace/sinan/client"}]}}]},
+                 Value).
 
