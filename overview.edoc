@@ -14,5 +14,29 @@ call parse on again. If a failure occures. it will return a error
 value of the form {error, {Reason, Line, Char}}.
 </p>
 
+<p>
+Here are a few examples that you can try in your repl.
+
+<pre>
+Erlang (BEAM) emulator version 5.6.3 [source] [smp:2] [async-threads:0] [hipe] [kernel-poll:false]
+
+Eshell V5.6.3  (abort with ^G)
+1> ktj_decode:decode("[1,2,3]").
+{[1,2,3],[],{0,7}}
+2> X = ktj_decode:decode("[1,2,3]").
+{[1,2,3],[],{0,7}}
+3> ktj_decode:decode(X).
+end_of_stream
+4> J = ktj_decode:decode("[1,2,3][4,5,6]").
+{[1,2,3],"[4,5,6]",{0,7}}
+5> ktj_decode:decode(J).
+{[4,5,6],[],{0,14}}
+6> Z = ktj_decode:decode(J).
+{[4,5,6],[],{0,14}}
+7> ktj_decode:decode(Z).
+end_of_stream
+8>
+</pre>
+</p>
 @author Eric Merritt
 @copyright 2007, 2008 Erlware

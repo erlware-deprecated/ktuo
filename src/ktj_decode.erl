@@ -55,9 +55,21 @@
 %%  quoted words are parsed into strings. This makes it easer to
 %%  use json as a config language.
 %%
-%% @spec (Stream) -> {JSONValue::value(), UnparsedRemainder}
+%%  It is designed to parse a stream of json objects. It will return
+%%  the erlang term representing the first json object along with
+%%  continuation information. You may continue to parse the json objects
+%%  by passing the return value of decode back to itself. At the end
+%%  of the json stream decode will return an 'end_of_stream'.
+%%
+%%
+%% @spec (Stream) -> {JSONValue::value(), UnparsedRemainder, LineInfo}
+%%                   | end_of_stream
 %% @end
 %%--------------------------------------------------------------------
+decode({_, [], _}) ->
+    end_of_stream;
+decode({_, UnparsedRemainder, {NewLines, Chars}}) ->
+    decode(UnparsedRemainder, NewLines, Chars);
 decode(Stream) when is_list(Stream) ->
     decode(Stream, 0, 0);
 decode(Stream) when is_binary(Stream) ->
