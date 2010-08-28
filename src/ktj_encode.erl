@@ -295,7 +295,10 @@ encode_object([], TAcc) ->
 %%=============================================================================
 encode_string_test() ->
     ?assertMatch("\"Hello\"", lists:flatten(encode(<<"Hello">>))),
-    ?assertMatch("\"hello\"", lists:flatten(encode('hello'))).
+    ?assertMatch("\"hello\"", lists:flatten(encode('hello'))),
+
+    % Don't be confused by the escapes, think in the bytes behind them ;)
+    ?assertMatch("\"\\\\hello\"", lists:flatten(encode(<<"\\hello">>))).
 
 encode_number_test() ->
     ?assertMatch("430", lists:flatten(encode(430))),
