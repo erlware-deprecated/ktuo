@@ -129,8 +129,6 @@ encode_string(Value) when is_list(Value) ->
 %% @private
 %% @end
 %%--------------------------------------------------------------------
-escape_string([$\\, Char | Rest], Acc) ->
-    escape_string(Rest, [Char, $\\ | Acc]);
 escape_string([$\" | Rest], Acc) ->
     escape_string(Rest, [$\", $\\ | Acc]);
 escape_string([$\\ | Rest], Acc) ->
