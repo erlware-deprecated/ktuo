@@ -34,7 +34,7 @@
 
 -include("eunit.hrl").
 
--export([stringish_body/5, digit/5, digit19/4]).
+-export([stringish_body/5, digit/5]).
 
 -define(LOC_1, 1).
 -define(LOC_2, 16).
@@ -83,36 +83,6 @@ stringish_body(Delim, [H | T], Acc, NewLines, Chars) ->
     stringish_body(Delim, T, [H | Acc], NewLines, Chars + 1);
 stringish_body(_Delim, [], _Acc, NewLines, Chars) ->
     {error, {"Found end of file while parsing string", NewLines, Chars}}.
-
-%%--------------------------------------------------------------------
-%% @doc
-%%  Parse from the stream ensuring that the digits has a length of
-%%  between 1 and 9.
-%%
-%% @spec digit19(Stream, Acc, NewLines, Chars) -> Acc2 | Error
-%% @end
-%%--------------------------------------------------------------------
-digit19([$1 | T], Acc, NewLines, Chars) ->
-    digit(T, [$1 | Acc], front, NewLines, Chars + 1);
-digit19([$2 | T], Acc, NewLines, Chars) ->
-    digit(T, [$2 | Acc], front, NewLines, Chars + 1);
-digit19([$3 | T], Acc, NewLines, Chars) ->
-    digit(T, [$3 | Acc], front, NewLines, Chars + 1);
-digit19([$4 | T], Acc, NewLines, Chars) ->
-    digit(T, [$4 | Acc], front, NewLines, Chars + 1);
-digit19([$5 | T], Acc, NewLines, Chars) ->
-    digit(T, [$5 | Acc], front, NewLines, Chars + 1);
-digit19([$6 | T], Acc, NewLines, Chars) ->
-    digit(T, [$6 | Acc], front, NewLines, Chars + 1);
-digit19([$7 | T], Acc, NewLines, Chars) ->
-    digit(T, [$7 | Acc], front, NewLines, Chars + 1);
-digit19([$8 | T], Acc, NewLines, Chars) ->
-    digit(T, [$8 | Acc], front, NewLines, Chars + 1);
-digit19([$9 | T], Acc, NewLines, Chars) ->
-    digit(T, [$9 | Acc], front, NewLines, Chars + 1);
-digit19(Else, Acc, NewLines, Chars) ->
-    decimal(Else, Acc, NewLines, Chars + 1).
-
 
 %%--------------------------------------------------------------------
 %% @doc
