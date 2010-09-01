@@ -103,7 +103,7 @@ decode(Stream, NewLines, Chars) ->
 value([$\" | T], NewLines, Chars) ->
     ktuo_parse_utils:stringish_body($\", T, [], NewLines, Chars + 1);
 value([$- | T], NewLines, Chars) ->
-    ktuo_parse_utils:digit19(T, [$-], NewLines, Chars + 1);
+    ktuo_parse_utils:digit(T, [$-], front, NewLines, Chars + 1);
 value([$0 | T], NewLines, Chars) ->
     ktuo_parse_utils:digit(T, [$0], front, NewLines, Chars + 1);
 value([$1 | T], NewLines, Chars) ->
