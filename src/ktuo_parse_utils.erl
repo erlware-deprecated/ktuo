@@ -280,27 +280,27 @@ number_test() ->
 
 
 string_test() ->
-    ?assertMatch({"Hello World", [], {0, 13}},
+    ?assertMatch({<<"Hello World">>, [], {0, 13}},
                  stringish_body($\", "Hello World\"", [], 0, 1)),
-    ?assertMatch({"Hello\n World", [], {1, 7}},
+    ?assertMatch({<<"Hello\n World">>, [], {1, 7}},
                  stringish_body($\", "Hello\n World\"", [], 0, 1)),
-    ?assertMatch({"Hello\" World", [], {0, 15}},
+    ?assertMatch({<<"Hello\" World">>, [], {0, 15}},
                  stringish_body($\", "Hello\\\" World\"", [], 0, 1)),
-    ?assertMatch({"Hello\\ World", [], {0, 14}},
+    ?assertMatch({<<"Hello\\ World">>, [], {0, 14}},
                  stringish_body($\", "Hello\\ World\"", [], 0, 1)),
-    ?assertMatch({"Hello\/ World", [], {0, 14}},
+    ?assertMatch({<<"Hello\/ World">>, [], {0, 14}},
                  stringish_body($\", "Hello\/ World\"", [], 0, 1)),
-    ?assertMatch({"Hello\b World", [], {0, 14}},
+    ?assertMatch({<<"Hello\b World">>, [], {0, 14}},
                  stringish_body($\", "Hello\b World\"", [], 0, 1)),
-    ?assertMatch({"Hello\f World", [], {0, 14}},
+    ?assertMatch({<<"Hello\f World">>, [], {0, 14}},
                  stringish_body($\", "Hello\f World\"", [], 0, 1)),
-    ?assertMatch({"Hello\n World", [], {1, 7}},
+    ?assertMatch({<<"Hello\n World">>, [], {1, 7}},
                  stringish_body($\", "Hello\n World\"", [], 0, 1)),
-    ?assertMatch({"Hello\r World", [], {1, 7}},
+    ?assertMatch({<<"Hello\r World">>, [], {1, 7}},
                  stringish_body($\", "Hello\r World\"", [], 0, 1)),
-    ?assertMatch({"Hello\t World", [], {0, 14}},
+    ?assertMatch({<<"Hello\t World">>, [], {0, 14}},
                  stringish_body($\", "Hello\t World\"", [], 0, 1)),
-    ?assertMatch({"Hello% World", [], {0, 19}},
+    ?assertMatch({<<"Hello% World">>, [], {0, 19}},
                  stringish_body($\", "Hello\\u0025 World\"", [], 0, 1)).
 
 
