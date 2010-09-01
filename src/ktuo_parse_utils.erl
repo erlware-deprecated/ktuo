@@ -78,7 +78,7 @@ stringish_body(Delim, [$\n | T], Acc, NewLines, _Chars) ->
 stringish_body(Delim, [$\r | T], Acc, NewLines, _Chars) ->
     stringish_body(Delim, T, [$\r | Acc], NewLines + 1, 0);
 stringish_body(Delim, [Delim | T], Acc, NewLines, Chars) ->
-    {lists:reverse(Acc), T, {NewLines, Chars + 1}};
+    {list_to_binary(lists:reverse(Acc)), T, {NewLines, Chars + 1}};
 stringish_body(Delim, [H | T], Acc, NewLines, Chars) ->
     stringish_body(Delim, T, [H | Acc], NewLines, Chars + 1);
 stringish_body(_Delim, [], _Acc, NewLines, Chars) ->
