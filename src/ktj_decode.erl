@@ -317,9 +317,9 @@ ident_test() ->
 config_test() ->
     {Value, _, _} = decode("{\"build\": {\"start_dir\": \"\\u002fhome\\u002fsomething\\u002fworkspace\\u002fsinan\\u002fclient\"}}"),
     ?assertMatch({obj,
-                  [{"build",
+                  [{<<"build">>,
                     {obj,
-                     [{"start_dir",
-                       "/home/something/workspace/sinan/client"}]}}]},
+                     [{<<"start_dir">>,
+                       <<"/home/something/workspace/sinan/client">>}]}}]},
                  Value).
 
