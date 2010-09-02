@@ -24,13 +24,13 @@
 %%% OTHER DEALINGS IN THE SOFTWARE.
 %%%---------------------------------------------------------------------------
 %%% @author Eric Merritt
+%%% @copyright (C) 2006
 %%% @doc
 %%%  Does a safe parsing of erlang tuple syntax. If it finds an atom it
 %%%  uses list_to_existing atom to translate it. This will only work
 %%%  if that atom is already in the atom table. This means its a bit quirky
 %%%  but it works for what I need.
 %%% @end
-%%% @copyright (C) 2006
 %%% Created : 19 Dec 2006 by Eric Merritt
 %%%-------------------------------------------------------------------
 -module(ktt_decode).

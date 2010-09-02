@@ -24,18 +24,19 @@
 %%% OTHER DEALINGS IN THE SOFTWARE.
 %%%---------------------------------------------------------------------------
 %%% @author Eric Merritt
+%%% @copyright (C) 2006
 %%% @doc
 %%% Used for decoding json from a string or binary
 %%%  Parsing strings into erlang.
-%%%  @type key() = string()
+%%%  @type key() = json_string()
 %%%  @type value() = object() | json_number() | array() | json_string() | json_bool() | null()
 %%%  @type object() = {obj, [{key(), value()}]}
 %%%  @type array() = [value()]
-%%%  @type json_number() = int() | float()
+%%%  @type json_number() = integer() | float()
 %%%  @type json_string() = binary()
 %%%  @type json_bool() = true | false
+%%%  @type null() = null
 %%% @end
-%%% @copyright (C) 2006
 %%% Created : 19 Dec 2006 by Eric Merritt
 %%%-------------------------------------------------------------------
 -module(ktj_decode).

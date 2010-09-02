@@ -24,10 +24,10 @@
 %%% OTHER DEALINGS IN THE SOFTWARE.
 %%%---------------------------------------------------------------------------
 %%% @author Eric Merritt
+%%% @copyright (C) 2006
 %%% @doc
 %%%   Help parsing the general parts of the system.
 %%% @end
-%%% @copyright (C) 2006
 %%% Created : 19 Dec 2006 by Eric Merritt
 %%%-------------------------------------------------------------------
 -module(ktuo_parse_utils).

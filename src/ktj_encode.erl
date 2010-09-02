@@ -24,14 +24,15 @@
 %%% OTHER DEALINGS IN THE SOFTWARE.
 %%%---------------------------------------------------------------------------
 %%% @author Eric Merritt
+%%% @copyright (C) 2006
 %%% @doc
 %%%  Parsing erlang into json
 %%%
 %%%  @type in_string() = binary()
 %%%  @type in_array() = [in_value()]
 %%%  @type in_atom() = string()
-%%%  @type in_object() = {obj, [{string(), in_value()}]}
-%%%  @type in_number() = int() | float()
+%%%  @type in_object() = {obj, [{in_string(), in_value()}]}
+%%%  @type in_number() = integer() | float()
 %%%  @type in_bool() = true | false
 %%%  @type in_null() = null
 %%%  @type in_value() = in_string() | in_array() | in_atom() | in_object()
@@ -39,7 +40,6 @@
 %%%
 %%%
 %%% @end
-%%% @copyright (C) 2006
 %%% Created : 19 Dec 2006 by Eric Merritt
 %%%-------------------------------------------------------------------
 -module(ktj_encode).
