@@ -2,7 +2,7 @@
 @doc
 
 <p>
-This application provides a straitforward and easy way to handle JSON encoding and decoding. The relevent modules are ktj_encode and ktj_decode. ktj_encode will encode json into an IO list while ktj_decode will decode lists or binaries.
+This application provides a straitforward and easy way to handle JSON encoding and decoding. The relevent modules are ktj_encode and ktj_decode. ktj_encode will encode json into an IO list while ktj_parse will decode lists or binaries.
 </p>
 
 <p>
@@ -21,19 +21,19 @@ Here are a few examples that you can try in your repl.
 Erlang (BEAM) emulator version 5.6.3 [source] [smp:2] [async-threads:0] [hipe] [kernel-poll:false]
 
 Eshell V5.6.3  (abort with ^G)
-1> ktj_decode:decode("[1,2,3]").
+1> ktj_parse:parse("[1,2,3]").
 {[1,2,3],[],{0,7}}
-2> X = ktj_decode:decode("[1,2,3]").
+2> X = ktj_parse:parse("[1,2,3]").
 {[1,2,3],[],{0,7}}
-3> ktj_decode:decode(X).
+3> ktj_parse:parse(X).
 end_of_stream
-4> J = ktj_decode:decode("[1,2,3][4,5,6]").
+4> J = ktj_parse:parse("[1,2,3][4,5,6]").
 {[1,2,3],"[4,5,6]",{0,7}}
-5> ktj_decode:decode(J).
+5> ktj_parse:parse(J).
 {[4,5,6],[],{0,14}}
-6> Z = ktj_decode:decode(J).
+6> Z = ktj_parse:parse(J).
 {[4,5,6],[],{0,14}}
-7> ktj_decode:decode(Z).
+7> ktj_parse:parse(Z).
 end_of_stream
 8>
 </pre>

@@ -4,6 +4,7 @@
   {vsn, "0.4.0.3"},
   {modules, [ktj_encode,
              ktj_decode,
+             ktj_parse,
              ktt_decode,
              ktuo_parse_utils]},
   {registered, []},
