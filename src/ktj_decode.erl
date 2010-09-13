@@ -300,6 +300,10 @@ boolean_test() ->
     ?assertMatch({true, [], {0, 4}}, value("true", 0, 0)),
     ?assertMatch({false, [], {0, 5}}, value("false", 0, 0)).
 
+%% This triggers a bug fixed after 0.4.0.1
+real_test() ->
+    ?assertMatch({-0.1, [], {0, 4}}, value("-0.1", 0, 0)).
+
 null_test() ->
     ?assertMatch({null, [], {0, 4}}, value("null", 0, 0)).
 
