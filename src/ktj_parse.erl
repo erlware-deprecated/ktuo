@@ -41,7 +41,7 @@
 %%%-------------------------------------------------------------------
 -module(ktj_parse).
 
--include("eunit.hrl").
+-include_lib("eunit/include/eunit.hrl").
 
 -export([parse/1, parse/3]).
 

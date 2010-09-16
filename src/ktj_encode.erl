@@ -44,7 +44,7 @@
 %%%-------------------------------------------------------------------
 -module(ktj_encode).
 
--include("eunit.hrl").
+-include_lib("eunit/include/eunit.hrl").
 
 -export([encode/1]).
 

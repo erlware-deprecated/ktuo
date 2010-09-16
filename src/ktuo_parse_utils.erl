@@ -32,7 +32,7 @@
 %%%-------------------------------------------------------------------
 -module(ktuo_parse_utils).
 
--include("eunit.hrl").
+-include_lib("eunit/include/eunit.hrl").
 
 -export([stringish_body/5, digit/5]).
 
