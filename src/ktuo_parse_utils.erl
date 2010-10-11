@@ -1,6 +1,5 @@
-%% -*- mode: Erlang; fill-column: 132; comment-column: 118; -*-
+%% -*- mode: Erlang; fill-column: 80; comment-column: 76; -*-
 %%%-------------------------------------------------------------------
-%%% Copyright (c) 2006,2007,2008 Erlware
 %%%
 %%% Permission is hereby granted, free of charge, to any
 %%% person obtaining a copy of this software and associated
@@ -24,7 +23,7 @@
 %%% OTHER DEALINGS IN THE SOFTWARE.
 %%%---------------------------------------------------------------------------
 %%% @author Eric Merritt
-%%% @copyright (C) 2006
+%%% @copyright (C) 2006-2010 Erlware
 %%% @doc
 %%%   Help parsing the general parts of the system.
 %%% @end
@@ -34,7 +33,11 @@
 
 -include_lib("eunit/include/eunit.hrl").
 
--export([stringish_body/5, digit/5]).
+-export([stringish_body/5,
+	 digit/5]).
+
+-export_type([string_result/0,
+	      number_result/0]).
 
 -define(LOC_1, 1).
 -define(LOC_2, 16).
@@ -42,19 +45,23 @@
 -define(LOC_4, 4096).
 
 %%=============================================================================
+%% Types
+%%=============================================================================
+-type string_result() :: {binary(), string(), {integer(), integer()}}.
+-type number_result() :: {number(), string(), {integer(), integer()}}.
+
+%%=============================================================================
 %% API
 %%=============================================================================
-%%--------------------------------------------------------------------
-%%
 %% @doc
 %%  Parses a string body into a string.
 %%  It expects the fact that something is a string to already be
 %%  detected. So strings should be of the form
 %%
 %%  this is a string body"
-%% @spec stringish_body(Delim, Stream, Acc, NewLines, Chars) -> {String, Rest}
 %% @end
-%%--------------------------------------------------------------------
+-spec stringish_body(char(), string(), string(), integer(), integer()) ->
+    string_result() | {error, {string(), integer(), integer()}}.
 stringish_body(Delim, [$\\, $\" | T], Acc, NewLines, Chars) ->
     stringish_body(Delim, T, [$\" | Acc], NewLines, Chars + 2);
 stringish_body(Delim, [$\\, $/ | T], Acc, NewLines, Chars) ->
@@ -84,13 +91,10 @@ stringish_body(Delim, [H | T], Acc, NewLines, Chars) ->
 stringish_body(_Delim, [], _Acc, NewLines, Chars) ->
     {error, {"Found end of file while parsing string", NewLines, Chars}}.
 
-%%--------------------------------------------------------------------
 %% @doc
 %%  Parse out the specified digit set.
-%%
-%% @spec digit(Stream, Acc, Next, NewLines, Chars) -> {Res, Rest}
 %% @end
-%%--------------------------------------------------------------------
+-spec digit(string(), string(), string(), integer(), integer()) -> {number(), string()}.
 digit([$0 | T], Acc, Next, NewLines, Chars) ->
     digit(T, [$0 | Acc], Next, NewLines, Chars + 1);
 digit([$1 | T], Acc, Next, NewLines, Chars) ->
@@ -117,6 +121,7 @@ digit(Stream, Acc, Next, NewLines, Chars) ->
 %%=============================================================================
 %% Internal functions
 %%=============================================================================
+-spec parse_hex_digit(string(), string(), string(), char(), integer(), integer()) -> number_result().
 parse_hex_digit([$0 | T], Acc, HexAcc, Delim, NewLines, Chars)
   when length(HexAcc) < 4 ->
     parse_hex_digit(T, Acc, [$0 | HexAcc], Delim, NewLines, Chars + 1);
@@ -189,12 +194,13 @@ parse_hex_digit(Stream, Acc, HexAcc, Delim, NewLines, Chars)
     Char = hexlist_to_integer([D4, D3, D2, D1]),
     stringish_body(Delim, Stream, [Char | Acc], NewLines, Chars).
 
-
+-spec decimal(string(), string(), integer(), integer()) -> number_result().
 decimal([$.| T], Acc, NewLines, Chars) when length(T) > 0 ->
     digit(T, [$. | Acc], decimal, NewLines, Chars + 1);
 decimal(Stream, Acc, NewLines, Chars) ->
     integer_end(Stream, Acc, NewLines, Chars).
 
+-spec exponent(string(), string(), integer(), integer()) -> number_result().
 exponent([$e, $+ | T], Acc,  NewLines, Chars) ->
     digit(T, [$+, $e | Acc], exponent, NewLines, Chars + 2);
 exponent([$E, $+ | T], Acc,  NewLines, Chars) ->
@@ -210,14 +216,16 @@ exponent([$e | T], Acc,  NewLines, Chars) ->
 exponent(Stream, Acc,  NewLines, Chars) ->
     float_end(Stream, Acc, NewLines, Chars).
 
+-spec integer_end(string(), string(), integer(), integer()) -> number_result().
 integer_end(Stream, Acc, NewLines, Chars) ->
     {list_to_integer(lists:reverse(Acc)), Stream, {NewLines, Chars}}.
 
-
+-spec float_end(string(), string(), integer(), integer()) -> number_result().
 float_end(Stream, Acc, NewLines, Chars) ->
     {list_to_float(lists:reverse(Acc)), Stream, {NewLines, Chars}}.
 
-
+-spec digit_next(string(), string(), front | decimal | exponent,
+		 integer(), integer()) -> number_result().
 digit_next(Stream, Acc, front, NewLines, Chars) ->
     decimal(Stream, Acc, NewLines, Chars);
 digit_next(Stream, Acc, decimal, NewLines, Chars) ->
@@ -225,6 +233,7 @@ digit_next(Stream, Acc, decimal, NewLines, Chars) ->
 digit_next(Stream, Acc, exponent, NewLines, Chars) ->
     float_end(Stream, Acc, NewLines, Chars).
 
+-spec hexlist_to_integer([number()]) -> integer().
 hexlist_to_integer([Size]) when Size >= 48 , Size =< 57 ->
    Size - 48;
 %% A-F
@@ -235,11 +244,11 @@ hexlist_to_integer([Size]) when Size >= 97 , Size =< 102 ->
     Size - 87;
 hexlist_to_integer([_Size]) ->
     not_a_num;
-
 hexlist_to_integer(Size) ->
     Len = string:span(Size, "1234567890abcdefABCDEF"),
     hexlist_to_integer2(Size, 16 bsl (4 *(Len-2)),0).
 
+-spec hexlist_to_integer2([number()], integer(), integer()) -> integer().
 hexlist_to_integer2([],_Pos,Sum)->
     Sum;
 hexlist_to_integer2([HexVal | HexString], Pos, Sum)

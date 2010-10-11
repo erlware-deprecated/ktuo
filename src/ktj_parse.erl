@@ -1,7 +1,5 @@
-%% -*- mode: Erlang; fill-column: 132; comment-column: 118; -*-
+%% -*- mode: Erlang; fill-column: 80; comment-column: 76; -*-
 %%%-------------------------------------------------------------------
-%%% Copyright (c) 2006,2007,2008 Erlware
-%%%
 %%% Permission is hereby granted, free of charge, to any
 %%% person obtaining a copy of this software and associated
 %%% documentation files (the "Software"), to deal in the
@@ -24,18 +22,10 @@
 %%% OTHER DEALINGS IN THE SOFTWARE.
 %%%---------------------------------------------------------------------------
 %%% @author Eric Merritt
-%%% @copyright (C) 2006
+%%% @copyright (C) 2006-2010
 %%% @doc
 %%% Used for decoding json from a string or binary
 %%%  Parsing strings into erlang.
-%%%  @type key() = json_string()
-%%%  @type value() = object() | json_number() | array() | json_string() | json_bool() | null()
-%%%  @type object() = {obj, [{key(), value()}]}
-%%%  @type array() = [value()]
-%%%  @type json_number() = integer() | float()
-%%%  @type json_string() = binary()
-%%%  @type json_bool() = true | false
-%%%  @type null() = null
 %%% @end
 %%% Created : 19 Dec 2006 by Eric Merritt
 %%%-------------------------------------------------------------------
@@ -45,9 +35,34 @@
 
 -export([parse/1, parse/3]).
 
+-export_type([key/0,
+	      value/0,
+	      object/0,
+	      atj_array/0,
+	      json_number/0,
+	      json_string/0,
+	      json_bool/0,
+	      null/0,
+	      mid_parse_stream/0,
+	      stream/0]).
+
+
 %%=============================================================================
-%% API
+%% Types
 %%=============================================================================
+
+-type key() :: json_string().
+-type value() :: object() | json_number() | atj_array() | json_string() | json_bool() | null().
+-type object() :: {obj, [{key(), value()}]}.
+-type atj_array() :: [value()].
+-type json_number() :: integer() | float().
+-type json_string() :: binary().
+-type json_bool() :: true | false.
+-type null() :: null.
+
+-opaque mid_parse_stream() :: {value(), string(), {integer(), integer()}}.
+-type stream() :: binary() | string() | mid_parse_stream().
+
 %%--------------------------------------------------------------------
 %% @doc
 %%  Parses the incoming stream into valid json objects.
@@ -63,10 +78,9 @@
 %%  of the json stream decode will return an 'end_of_stream'.
 %%
 %%
-%% @spec (Stream) -> {JSONValue::value(), UnparsedRemainder, LineInfo}
-%%                   | end_of_stream
 %% @end
 %%--------------------------------------------------------------------
+-spec parse(stream()) -> mid_parse_stream() | end_of_stream.
 parse({_, [], _}) ->
     end_of_stream;
 parse({_, UnparsedRemainder, {NewLines, Chars}}) ->
@@ -80,11 +94,9 @@ parse(Stream) when is_binary(Stream) ->
 %%--------------------------------------------------------------------
 %% @doc
 %%  Decodes the value with the fixed set of newlines and chars.
-%%
-%% @spec (Stream, NewLines, Chars) ->
-%%   {DecodedValue::value(), UnparsedRemainder, CharRemainder}
 %% @end
 %%--------------------------------------------------------------------
+-spec parse(string(), integer(), integer()) -> mid_parse_stream().
 parse(Stream, NewLines, Chars) ->
     value(Stream, NewLines, Chars).
 
@@ -101,6 +113,7 @@ parse(Stream, NewLines, Chars) ->
 %% @private
 %% @end
 %%--------------------------------------------------------------------
+-spec value(string(), integer(), integer()) -> mid_parse_stream().
 value([$\" | T], NewLines, Chars) ->
     ktuo_parse_utils:stringish_body($\", T, [], NewLines, Chars + 1);
 value([$- | T], NewLines, Chars) ->
@@ -146,7 +159,7 @@ value([$\n | T], NewLines, _Chars) ->
 value(Stream, NewLines, Chars) ->
     ident(Stream, [], NewLines, Chars).
 
-
+-spec array_body(string(), [value()], integer(), integer()) -> mid_parse_stream().
 array_body([$] | T], Acc, NewLines, Chars) ->
     {lists:reverse(Acc), T, {NewLines, Chars + 1}};
 array_body([$, | T], Acc, NewLines, Chars) ->
@@ -163,6 +176,7 @@ array_body(Stream, Acc, NewLines, Chars) ->
     {Value, Rest, {NLines, NChars}} = value(Stream, NewLines, Chars),
     array_body(Rest, [Value | Acc], NLines, NChars).
 
+-spec object_body(string(), [{string(), value()}], integer(), integer()) -> mid_parse_stream().
 object_body([$} | T], Acc, NewLines, Chars) ->
     {{obj, Acc}, T, {NewLines, Chars + 1}};
 object_body([$, | T], Acc, NewLines, Chars) ->
@@ -179,13 +193,10 @@ object_body(Else, Acc, NewLines, Chars) ->
     do_key(Else, Acc, NewLines, Chars).
 
 
-%%--------------------------------------------------------------------
 %% @doc
 %%  Parse out the key. When that is complete parse out the value.
-%%
-%% @spec (Stream, Acc, NewLines, Chars) -> Error | {Prop, Rest, N, C}
 %% @end
-%%--------------------------------------------------------------------
+-spec do_key(string(), [{string(), value()}], integer(), integer()) -> mid_parse_stream().
 do_key(Stream, Acc, NewLines, Chars) ->
     case key(Stream, NewLines, Chars) of
         {Key, Rest1, {NLines, NChars}} ->
@@ -194,14 +205,10 @@ do_key(Stream, Acc, NewLines, Chars) ->
             Else
     end.
 
-%%--------------------------------------------------------------------
 %% @doc
 %%  Parse out the value. Then continue with the object.
-%%
-%% @spec (Key, Stream, Acc, NewLines, Chars) -> Error |
-%%   {PropList, Rest, {NewLines, Chars}}
 %% @end
-%%--------------------------------------------------------------------
+-spec do_value(string(), string(), [{string(), value()}], integer(), integer()) -> mid_parse_stream().
 do_value(Key, Stream, Acc, NewLines, Chars) ->
     case find($:, Stream, NewLines, Chars) of
         {Rest, NLines, NChars} ->
@@ -216,16 +223,12 @@ do_value(Key, Stream, Acc, NewLines, Chars) ->
             Else1
     end.
 
-%%--------------------------------------------------------------------
 %% @doc
 %%  Make an effort to run to the next instance of the delimeter.
 %%  Only whitespace and newlines are expected to be between the start
 %%  and the delim.
-%%
-%%d @spec (Delim, Stream, NewLines, Chars) -> Error | {Rest, NewLines,
-%%          Chars}
 %% @end
-%%--------------------------------------------------------------------
+-spec find(string(), string(), integer(), integer()) -> mid_parse_stream().
 find(Delim, [Delim | T], NewLines, Chars) ->
     {T, NewLines, Chars + 1};
 find(Delim, [$\s | T], NewLines, Chars) ->
@@ -240,13 +243,10 @@ find(Delim, _Rest, NewLines, Chars) ->
     {error, {"Expected object seperator", Delim, NewLines, Chars}}.
 
 
-%%--------------------------------------------------------------------
 %% @doc
 %%  Parse the key as part of the object.
-%%
-%% @spec (Stream, NewLines, Chars) -> {Key, NewLine, Chars} | Error
 %% @end
-%%--------------------------------------------------------------------
+-spec key(string(), integer(), integer()) -> mid_parse_stream().
 key([$\" | T], NewLines, Chars) ->
     ktuo_parse_utils:stringish_body($\", T, [], NewLines, Chars + 1);
 key([$\s | T], NewLines, Chars) ->
@@ -261,15 +261,11 @@ key(Stream, NewLines, Chars) ->
     ident(Stream, [], NewLines, Chars).
 
 
-%%--------------------------------------------------------------------
 %% @doc
 %%  Parse a single word ident from the stream. Idents may be
 %%  of the form [a-z][a-zA-Z0-9_]*
-%%
-%% @spec (Stream, Acc, NewLines, Chars) -> {Ident, Rest, N, L} |
-%%   Error
 %% @end
-%%--------------------------------------------------------------------
+-spec ident(string(), string(), integer(), integer()) -> mid_parse_stream().
 ident([H | T], Acc, NewLines, Chars) when H >= $a, H =< $z ->
     ident(T, [H | Acc], NewLines, Chars + 1);
 ident([H | T], Acc, NewLines, Chars) when H >= $A, H =< $Z ->

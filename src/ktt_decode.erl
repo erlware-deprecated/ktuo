@@ -1,7 +1,5 @@
-%% -*- mode: Erlang; fill-column: 132; comment-column: 118; -*-
+%% -*- mode: Erlang; fill-column: 80; comment-column: 76; -*-
 %%%-------------------------------------------------------------------
-%%% Copyright (c) 2006,2007,2008 Erlware
-%%%
 %%% Permission is hereby granted, free of charge, to any
 %%% person obtaining a copy of this software and associated
 %%% documentation files (the "Software"), to deal in the
@@ -24,7 +22,7 @@
 %%% OTHER DEALINGS IN THE SOFTWARE.
 %%%---------------------------------------------------------------------------
 %%% @author Eric Merritt
-%%% @copyright (C) 2006
+%%% @copyright (C) 2006-2010 Erlware
 %%% @doc
 %%%  Does a safe parsing of erlang tuple syntax. If it finds an atom it
 %%%  uses list_to_existing atom to translate it. This will only work
@@ -37,28 +35,50 @@
 
 -include_lib("eunit/include/eunit.hrl").
 
--compile(export_all).
+-export([decode/1,
+	 decode/3]).
 
--export([decode/1, decode/3]).
+-export_type([ktt_list/0,
+	      ktt_string/0,
+	      ktt_number/0,
+	      ktt_atom/0,
+	      value/0,
+	      stream/0,
+	      position_indicator/0,
+	      result/0]).
+%%=============================================================================
+%% Types
+%%=============================================================================
+-type ktt_list() :: list().
+-type ktt_string() :: binary().
+-type ktt_number() :: number().
+-type ktt_atom() :: atom().
+-type value() :: ktt_list() | ktt_string() | ktt_number() | ktt_atom().
+-type stream() :: binary() | string().
+-type position_indicator() :: {integer(), integer()}.
+-type result() :: {[value()], string(), position_indicator()}.
 
-%%--------------------------------------------------------------------
-%% @spec decode(Stream) -> {ParsedTuples, UnparsedRemainder}
-%%
+%%=============================================================================
+%% API
+%%=============================================================================
 %% @doc
 %%  Parses the incoming stream into valid erlang objects.
 %%  ``
 %%   Tuple   ==   Erlang
 %%   List        List
-%%   String      List
+%%   String      binary
 %%   Number      Number
 %%   Atom        Atom
 %%  ''
 %%  This decode function parses a subset of erlang data notation.
 %% @end
-%%--------------------------------------------------------------------
+-spec decode(stream()) -> result().
+decode(Stream) when is_binary(Stream) ->
+   decode(binary_to_list(Stream), 0, 0);
 decode(Stream) ->
    decode(Stream, 0, 0).
 
+-spec decode(stream(), integer(), integer()) -> result().
 decode(Stream, NewLines, Chars) ->
     value(Stream, NewLines, Chars).
 
@@ -66,13 +86,10 @@ decode(Stream, NewLines, Chars) ->
 %%=============================================================================
 %% Internal Functions
 %%=============================================================================
-%%--------------------------------------------------------------------
 %% @doc
 %%  Parse a tuple value.
-%%
-%% @spec value(Stream, NewLines, Chars) -> {Value, Rest, {N, L}}
 %% @end
-%%--------------------------------------------------------------------
+-spec value(string(), integer(), integer()) -> result().
 value([$\" | T], NewLines, Chars) ->
     ktuo_parse_utils:stringish_body($\", T, [], NewLines, Chars + 1);
 value([$\' | T], NewLines, Chars) ->
@@ -120,13 +137,11 @@ value(Stream, NewLines, Chars) ->
     bare_atom(Stream, [], NewLines, Chars).
 
 
-%%--------------------------------------------------------------------
 %% @doc
 %%  Parse a list body. A list is [ elements, ..].
-%%
-%% @spec list_body(Stream, Acc, NewLines, Chars) -> {List, Rest, {N, L}} | Error
 %% @end
-%%--------------------------------------------------------------------
+-spec list_body(string(), [value()], integer(), integer()) ->
+    result() | {error, {string(), integer(), integer()}}.
 list_body([$] | T], Acc, NewLines, Chars) ->
     {lists:reverse(Acc), T, {NewLines, Chars + 1}};
 list_body([$, | T], Acc, NewLines, Chars) ->
@@ -147,13 +162,11 @@ list_body(Stream, Acc, NewLines, Chars) ->
             Else
     end.
 
-%%--------------------------------------------------------------------
 %% @doc
 %%  Parse the tuple body. Tuple bodies are of the form { element, ..}.
-%%
-%% @spec tuple_body(Stream, Acc, NewLines, Chars) -> {Tuple, Rest, {N, C}} | Error
 %% @end
-%%--------------------------------------------------------------------
+-spec tuple_body(string(), [value()], integer(), integer()) ->
+    result() | {error, {string(), integer(), integer()}}.
 tuple_body([$} | T], Acc, NewLines, Chars) ->
     {list_to_tuple(lists:reverse(Acc)), T, {NewLines, Chars + 1}};
 tuple_body([$, | T], Acc, NewLines, Chars) ->
@@ -175,13 +188,11 @@ tuple_body(Stream, Acc, NewLines, Chars) ->
     end.
 
 
-%%--------------------------------------------------------------------
 %% @doc
 %%  Parse an atom that doesn't have single quote delimeters.
-%%
-%% @spec bare_atom(Stream, Acc, NewLines, Chars) -> {Atom, Rest, {N, C}} | Error
 %% @end
-%%--------------------------------------------------------------------
+-spec bare_atom(string(), string(), integer(), integer()) ->
+    result() | {error, {string(), integer(), integer()}}.
 bare_atom([H | T], Acc, NewLines, Chars) when H >= $a, H =< $z ->
     bare_atom(T, [H | Acc], NewLines, Chars + 1);
 bare_atom([H | T], Acc, NewLines, Chars) when H >= $A, H =< $Z ->
